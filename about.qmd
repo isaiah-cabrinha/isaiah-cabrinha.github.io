@@ -1,5 +1,28 @@
 ---
-title: "About"
+title: "About Me"
 ---
 
-Hi I'm Isaiah
+# Isaiah Cabrinha
+
+## Experience
+
+### Data Integration Specialist (BYU OIT)
+- Performed ETL to make data processes more efficient
+
+### Data Analyst Intern (BYU Office of Belonging)
+- Constructed data reports using statistical techniques, R, Tableau, and Power BI
+
+### Research Assistant
+- Utilized Bayesian techniques to gain insights into fashion trends and how they relate to brands
+
+
+## Skills
+- R
+- SQL
+- Python
+- Git/Github
+- Quarto
+- Streamlit dashboards
+- C++
+
+## Projects
