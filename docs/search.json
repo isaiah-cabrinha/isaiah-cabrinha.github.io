@@ -9,8 +9,22 @@
   {
     "objectID": "about.html",
     "href": "about.html",
-    "title": "About",
+    "title": "About Me",
     "section": "",
-    "text": "Hi I’m Isaiah"
+    "text": "Performed ETL to make data processes more efficient\n\n\n\n\n\nConstructed data reports using statistical techniques, R, Tableau, and Power BI\n\n\n\n\n\nUtilized Bayesian techniques to gain insights into fashion trends and how they relate to brands\n\n\n\n\n\n\nR\nSQL\nPython\nGit/Github\nQuarto\nStreamlit dashboards\nC++"
+  },
+  {
+    "objectID": "about.html#experience",
+    "href": "about.html#experience",
+    "title": "About Me",
+    "section": "",
+    "text": "Performed ETL to make data processes more efficient\n\n\n\n\n\nConstructed data reports using statistical techniques, R, Tableau, and Power BI\n\n\n\n\n\nUtilized Bayesian techniques to gain insights into fashion trends and how they relate to brands"
+  },
+  {
+    "objectID": "about.html#skills",
+    "href": "about.html#skills",
+    "title": "About Me",
+    "section": "",
+    "text": "R\nSQL\nPython\nGit/Github\nQuarto\nStreamlit dashboards\nC++"
   }
 ]
