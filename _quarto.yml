@@ -1,6 +1,8 @@
 project:
   type: website
   output-dir: docs
+  resources:
+    - "files/**"
 
 website:
   title: Isaiah Cabrinha
@@ -9,6 +11,7 @@ website:
       - href: index.qmd
         text: Home
       - about.qmd
+      - projects.qmd
 
 format:
   html:

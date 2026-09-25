@@ -1,0 +1,6 @@
+---
+title: "Projects"
+---
+
+## Bayesian Approach to Data Analysis
+[Read Full Paper (PDF)](files/Fashion-Trend-Research.pdf){target="_blank"}
