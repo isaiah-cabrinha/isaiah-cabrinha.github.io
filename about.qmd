@@ -25,4 +25,4 @@ title: "About Me"
 - Streamlit dashboards
 - C++
 
-## Projects
+
