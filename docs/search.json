@@ -61,5 +61,19 @@
     "title": "Who Gained the Most Places? Comparing F1 Grid and Finish Positions with pandas",
     "section": "",
     "text": "import pandas as pd\nresults = pd.read_csv(\"results.csv\", na_values=\"\\\\N\")\nresults.head()\n\n\n\n\n\n\n\n\nresultId\nraceId\ndriverId\nconstructorId\nnumber\ngrid\nposition\npositionText\npositionOrder\npoints\n\n\n\n\n0\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\n\n\n1\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\n\n\n2\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\n\n\n3\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\n\n\n4\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN"
+  },
+  {
+    "objectID": "posts/f1-positions/f1.html",
+    "href": "posts/f1-positions/f1.html",
+    "title": "Who Gained the Most Places? Comparing F1 Grid and Finish Positions with pandas",
+    "section": "",
+    "text": "import pandas as pd\nresults = pd.read_csv(\"results.csv\", na_values=\"\\\\N\")\nresults.head()\n\n\n\n\n\n\n\n\nresultId\nraceId\ndriverId\nconstructorId\nnumber\ngrid\nposition\npositionText\npositionOrder\npoints\nlaps\ntime\nmilliseconds\nfastestLap\nrank\nfastestLapTime\nfastestLapSpeed\nstatusId\n\n\n\n\n0\n1\n18\n1\n1\n22.0\n1\n1.0\n1\n1\n10.0\n58\n1:34:50.616\n5690616.0\n39.0\n2.0\n1:27.452\n218.300\n1\n\n\n1\n2\n18\n2\n2\n3.0\n5\n2.0\n2\n2\n8.0\n58\n+5.478\n5696094.0\n41.0\n3.0\n1:27.739\n217.586\n1\n\n\n2\n3\n18\n3\n3\n7.0\n7\n3.0\n3\n3\n6.0\n58\n+8.163\n5698779.0\n41.0\n5.0\n1:28.090\n216.719\n1\n\n\n3\n4\n18\n4\n4\n5.0\n11\n4.0\n4\n4\n5.0\n58\n+17.181\n5707797.0\n58.0\n7.0\n1:28.603\n215.464\n1\n\n\n4\n5\n18\n5\n1\n23.0\n3\n5.0\n5\n5\n4.0\n58\n+18.014\n5708630.0\n43.0\n1.0\n1:27.418\n218.385\n1"
+  },
+  {
+    "objectID": "posts/f1-positions/f1.html#introduction",
+    "href": "posts/f1-positions/f1.html#introduction",
+    "title": "Who Gained the Most Places? Comparing F1 Grid and Finish Positions with pandas",
+    "section": "",
+    "text": "import pandas as pd\nresults = pd.read_csv(\"results.csv\", na_values=\"\\\\N\")\nresults.head()\n\n\n\n\n\n\n\n\nresultId\nraceId\ndriverId\nconstructorId\nnumber\ngrid\nposition\npositionText\npositionOrder\npoints\nlaps\ntime\nmilliseconds\nfastestLap\nrank\nfastestLapTime\nfastestLapSpeed\nstatusId\n\n\n\n\n0\n1\n18\n1\n1\n22.0\n1\n1.0\n1\n1\n10.0\n58\n1:34:50.616\n5690616.0\n39.0\n2.0\n1:27.452\n218.300\n1\n\n\n1\n2\n18\n2\n2\n3.0\n5\n2.0\n2\n2\n8.0\n58\n+5.478\n5696094.0\n41.0\n3.0\n1:27.739\n217.586\n1\n\n\n2\n3\n18\n3\n3\n7.0\n7\n3.0\n3\n3\n6.0\n58\n+8.163\n5698779.0\n41.0\n5.0\n1:28.090\n216.719\n1\n\n\n3\n4\n18\n4\n4\n5.0\n11\n4.0\n4\n4\n5.0\n58\n+17.181\n5707797.0\n58.0\n7.0\n1:28.603\n215.464\n1\n\n\n4\n5\n18\n5\n1\n23.0\n3\n5.0\n5\n5\n4.0\n58\n+18.014\n5708630.0\n43.0\n1.0\n1:27.418\n218.385\n1"
   }
 ]
