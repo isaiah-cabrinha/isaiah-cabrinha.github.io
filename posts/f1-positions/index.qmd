@@ -1,0 +1,16 @@
+---
+title: "Who Gained the Most Places? Comparing F1 Grid and Finish Positions with pandas"
+author: "Isaiah Cabrinha"
+date: "2026-10-13"
+categories: [pandas, visualization, Formula 1]
+description: "Merge race data, calculate positions gained or lost, and chart the results."
+---
+
+## Introduction
+
+
+```{python}
+import pandas as pd
+results = pd.read_csv("results.csv", na_values="\\N")
+results.head()
+```
