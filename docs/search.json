@@ -40,5 +40,26 @@
     "title": "About Me",
     "section": "",
     "text": "R\nSQL\nPython\nGit/Github\nQuarto\nStreamlit dashboards\nC++"
+  },
+  {
+    "objectID": "blogs.html",
+    "href": "blogs.html",
+    "title": "Blog",
+    "section": "",
+    "text": "Who Gained the Most Places? Comparing F1 Grid and Finish Positions with pandas\n\n\nMerge race data, calculate positions gained or lost, and chart the results.\n\n\n\n\n\nOct 13, 2026\n\n\nIsaiah Cabrinha\n\n\n\n\n\nNo matching items"
+  },
+  {
+    "objectID": "posts/f1-positions/index.html",
+    "href": "posts/f1-positions/index.html",
+    "title": "Who Gained the Most Places? Comparing F1 Grid and Finish Positions with pandas",
+    "section": "",
+    "text": "import pandas as pd\nresults = pd.read_csv(\"results.csv\", na_values=\"\\\\N\")\nresults.head()\n\n\n\n\n\n\n\n\nresultId\nraceId\ndriverId\nconstructorId\nnumber\ngrid\nposition\npositionText\npositionOrder\npoints\n\n\n\n\n0\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\n\n\n1\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\n\n\n2\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\n\n\n3\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\n\n\n4\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN"
+  },
+  {
+    "objectID": "posts/f1-positions/index.html#introduction",
+    "href": "posts/f1-positions/index.html#introduction",
+    "title": "Who Gained the Most Places? Comparing F1 Grid and Finish Positions with pandas",
+    "section": "",
+    "text": "import pandas as pd\nresults = pd.read_csv(\"results.csv\", na_values=\"\\\\N\")\nresults.head()\n\n\n\n\n\n\n\n\nresultId\nraceId\ndriverId\nconstructorId\nnumber\ngrid\nposition\npositionText\npositionOrder\npoints\n\n\n\n\n0\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\n\n\n1\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\n\n\n2\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\n\n\n3\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\n\n\n4\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN"
   }
 ]

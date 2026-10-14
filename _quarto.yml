@@ -12,7 +12,7 @@ website:
         text: Home
       - about.qmd
       - projects.qmd
-      -blogs.qmd
+      - blogs.qmd
 
 format:
   html:
