@@ -306,7 +306,7 @@ window.Quarto = {
 </section>
 <section id="step-1-load-the-files" class="level2">
 <h2 class="anchored" data-anchor-id="step-1-load-the-files">Step 1: Load the files</h2>
-<div id="2a79a742" class="cell" data-execution_count="1">
+<div id="09891d88" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -382,7 +382,7 @@ window.Quarto = {
 <section id="step-2-pick-one-race" class="level2">
 <h2 class="anchored" data-anchor-id="step-2-pick-one-race">Step 2: Pick one race</h2>
 <p>Each race has its own <code>raceId</code>. Rather than memorizing ID numbers, we can look it up in <code>races</code> by year and name:</p>
-<div id="ba6c0bd4" class="cell" data-execution_count="2">
+<div id="2449435b" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>YEAR <span class="op">=</span> <span class="dv">2023</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>RACE <span class="op">=</span> <span class="st">"Bahrain Grand Prix"</span></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -400,7 +400,7 @@ window.Quarto = {
 <section id="step-3-filter-and-merge" class="level2">
 <h2 class="anchored" data-anchor-id="step-3-filter-and-merge">Step 3: Filter and merge</h2>
 <p>Now we keep only the rows for that race and use <code>.merge()</code> to attach each driver’s three-letter code (like <code>VER</code> or <code>HAM</code>) by matching on <code>driverId</code>:</p>
-<div id="91aa9662" class="cell" data-execution_count="3">
+<div id="f627aa9d" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> (</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    results[results[<span class="st">"raceId"</span>] <span class="op">==</span> race_id]</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    .merge(drivers[[<span class="st">"driverId"</span>, <span class="st">"code"</span>, <span class="st">"surname"</span>]], on<span class="op">=</span><span class="st">"driverId"</span>)</span>
@@ -480,7 +480,7 @@ window.Quarto = {
 <li><strong>Pit-lane starts.</strong> A driver who starts from the pit lane has <code>grid = 0</code>. Left alone, that would make it look like they started <em>ahead</em> of pole position. We’ll treat them as starting from the back of the grid.</li>
 <li><strong>Did not finish (DNF).</strong> A driver who retires on lap 1 will look like they “lost” a lot of places, even though they didn’t race. We’ll flag those drivers so we can interpret them separately.</li>
 </ol>
-<div id="8682a9fa" class="cell" data-execution_count="4">
+<div id="7984eca3" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>n_starters <span class="op">=</span> <span class="bu">len</span>(df)</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"grid_position"</span>] <span class="op">=</span> df[<span class="st">"grid_position"</span>].replace(<span class="dv">0</span>, n_starters)</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -500,7 +500,7 @@ window.Quarto = {
 <li><span class="math inline">\(\Delta_i = 0\)</span>: the driver finished where they started</li>
 </ul>
 <p>In pandas, subtracting two columns works row by row automatically, so this is one line:</p>
-<div id="133d0214" class="cell" data-execution_count="5">
+<div id="44663a7d" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"positions_changed"</span>] <span class="op">=</span> df[<span class="st">"grid_position"</span>] <span class="op">-</span> df[<span class="st">"finish_position"</span>]</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df.sort_values(<span class="st">"positions_changed"</span>, ascending<span class="op">=</span><span class="va">False</span>)</span>
@@ -693,25 +693,36 @@ window.Quarto = {
 <h2 class="anchored" data-anchor-id="step-6-visualize-it">Step 6: Visualize it</h2>
 <p>A table works, but a bar chart makes the pattern obvious at a glance. We’ll color gains green, losses red, and drivers who didn’t finish gray.</p>
 <div id="cell-fig-positions" class="cell" data-execution_count="6">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> bar_color(row):</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> row[<span class="st">"classified"</span>]:</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">"lightgray"</span></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> row[<span class="st">"positions_changed"</span>] <span class="op">&gt;</span> <span class="dv">0</span>:</span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">"seagreen"</span></span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> row[<span class="st">"positions_changed"</span>] <span class="op">&lt;</span> <span class="dv">0</span>:</span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">"firebrick"</span></span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="st">"gray"</span></span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>colors <span class="op">=</span> df.<span class="bu">apply</span>(bar_color, axis<span class="op">=</span><span class="dv">1</span>)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib.patches <span class="im">import</span> Patch</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> bar_color(row):</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> row[<span class="st">"classified"</span>]:</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">"lightgray"</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> row[<span class="st">"positions_changed"</span>] <span class="op">&gt;</span> <span class="dv">0</span>:</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">"seagreen"</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> row[<span class="st">"positions_changed"</span>] <span class="op">&lt;</span> <span class="dv">0</span>:</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">"firebrick"</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="st">"gray"</span></span>
 <span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="dv">6</span>))</span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>ax.barh(df[<span class="st">"code"</span>], df[<span class="st">"positions_changed"</span>], color<span class="op">=</span>colors)</span>
-<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>ax.axvline(<span class="dv">0</span>, color<span class="op">=</span><span class="st">"black"</span>, linewidth<span class="op">=</span><span class="fl">0.8</span>)</span>
-<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>ax.invert_yaxis()  <span class="co"># biggest gainer at the top</span></span>
-<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"Positions gained (+) / lost (−)"</span>)</span>
-<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="ss">f"</span><span class="sc">{</span>YEAR<span class="sc">}</span><span class="ss"> </span><span class="sc">{</span>RACE<span class="sc">}</span><span class="ss">: Grid vs. Finish"</span>)</span>
-<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
-<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>colors <span class="op">=</span> df.<span class="bu">apply</span>(bar_color, axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="dv">6</span>))</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>bars <span class="op">=</span> ax.barh(df[<span class="st">"code"</span>], df[<span class="st">"positions_changed"</span>], color<span class="op">=</span>colors)</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>ax.bar_label(bars, padding<span class="op">=</span><span class="dv">3</span>)</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>ax.axvline(<span class="dv">0</span>, color<span class="op">=</span><span class="st">"black"</span>, linewidth<span class="op">=</span><span class="fl">0.8</span>)</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>ax.invert_yaxis()  <span class="co"># biggest gainer at the top</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"Positions gained (+) / lost (−)"</span>)</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="ss">f"</span><span class="sc">{</span>YEAR<span class="sc">}</span><span class="ss"> </span><span class="sc">{</span>RACE<span class="sc">}</span><span class="ss">: Grid vs. Finish"</span>)</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>ax.legend(</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>    handles<span class="op">=</span>[</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>        Patch(color<span class="op">=</span><span class="st">"seagreen"</span>, label<span class="op">=</span><span class="st">"Gained places"</span>),</span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>        Patch(color<span class="op">=</span><span class="st">"firebrick"</span>, label<span class="op">=</span><span class="st">"Lost places"</span>),</span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>        Patch(color<span class="op">=</span><span class="st">"lightgray"</span>, label<span class="op">=</span><span class="st">"Did not finish"</span>),</span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>    ],</span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>    loc<span class="op">=</span><span class="st">"lower right"</span>,</span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div id="fig-positions" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Horizontal bar chart of each driver's change in position from grid to finish. Bars to the right in green show places gained, bars to the left in red show places lost, and gray bars mark drivers who did not finish.">
 <figure class="quarto-float quarto-float-fig figure">
@@ -732,13 +743,14 @@ Figure&nbsp;1: Positions gained or lost from the starting grid to the finish.
 <!-- - Who gained the most places, and why might that be? (bad qualifying, strategy, fast car) -->
 <!-- - Who lost the most among drivers who finished? -->
 <!-- - Did any DNFs make the chart look misleading? This is why we flagged them. -->
-<p>[Write 1–2 short paragraphs here about who gained, who lost, and what the gray DNF bars tell you.]</p>
+<p>From this chart, we can see that Gasly gained the most places of any driver, while Norris lost the most places among drivers who finished the race. Leclerc’s −16 looks worse than Norris’s, but because we flagged him as a DNF, we know that drop came from retiring, not from being passed. The DNFs also help explain Gasly’s big gain: starting near the back, he moved up automatically when three cars ahead of him retired, so roughly 8 of his 11 places came from racing.</p>
+<p>It’s also worth noticing that Verstappen, Pérez, and Sainz show no change at all. A driver who starts on pole can’t gain places, so this metric naturally favors drivers who start further back.</p>
 <p>Keep one limitation in mind: the <code>grid</code> column is the <strong>starting grid</strong>, not the raw qualifying result. If a driver received a grid penalty, their grid position may be worse than where they qualified, which can make their race look better than it was.</p>
 </section>
 <section id="conclusion-and-next-steps" class="level2">
 <h2 class="anchored" data-anchor-id="conclusion-and-next-steps">Conclusion and next steps</h2>
 <p>With just a merge, one subtraction, and a sort, we turned three separate CSV files into a clear picture of who had the best race day. The same pattern (subtract two columns, sort, plot) works for any “before vs.&nbsp;after” comparison, like test scores before and after a study session or prices before and after a sale.</p>
-<p><strong>Your turn:</strong> change <code>YEAR</code> and <code>RACE</code> to a race you remember, especially a chaotic one with rain or safety cars, and see how the chart changes. For a bigger challenge, try using <code>.groupby("driverId")</code> to find each driver’s <strong>average</strong> positions gained across a whole season. Who is the best racer when qualifying doesn’t go their way?</p>
+<p><strong>Your turn:</strong> Change <code>YEAR</code> and <code>RACE</code> to a race you remember, especially a chaotic one with rain or safety cars, and see how the chart changes. For a bigger challenge, try using <code>.groupby("driverId")</code> to find each driver’s <strong>average</strong> positions gained across a whole season. Who is the best racer when qualifying doesn’t go their way?</p>
 <p><strong>Resources:</strong></p>
 <ul>
 <li><a href="https://www.kaggle.com/datasets/rohanrao/formula-1-world-championship-1950-2020">Kaggle: Formula 1 World Championship dataset</a></li>

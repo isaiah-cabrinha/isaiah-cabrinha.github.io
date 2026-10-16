@@ -126,6 +126,8 @@ A table works, but a bar chart makes the pattern obvious at a glance. We'll colo
 #| fig-cap: "Positions gained or lost from the starting grid to the finish."
 #| fig-alt: "Horizontal bar chart of each driver's change in position from grid to finish. Bars to the right in green show places gained, bars to the left in red show places lost, and gray bars mark drivers who did not finish."
 
+from matplotlib.patches import Patch
+
 def bar_color(row):
     if not row["classified"]:
         return "lightgray"
@@ -138,11 +140,20 @@ def bar_color(row):
 colors = df.apply(bar_color, axis=1)
 
 fig, ax = plt.subplots(figsize=(7, 6))
-ax.barh(df["code"], df["positions_changed"], color=colors)
+bars = ax.barh(df["code"], df["positions_changed"], color=colors)
+ax.bar_label(bars, padding=3)
 ax.axvline(0, color="black", linewidth=0.8)
 ax.invert_yaxis()  # biggest gainer at the top
 ax.set_xlabel("Positions gained (+) / lost (−)")
 ax.set_title(f"{YEAR} {RACE}: Grid vs. Finish")
+ax.legend(
+    handles=[
+        Patch(color="seagreen", label="Gained places"),
+        Patch(color="firebrick", label="Lost places"),
+        Patch(color="lightgray", label="Did not finish"),
+    ],
+    loc="lower right",
+)
 plt.tight_layout()
 plt.show()
 ```
@@ -154,7 +165,9 @@ plt.show()
 <!-- - Who lost the most among drivers who finished? -->
 <!-- - Did any DNFs make the chart look misleading? This is why we flagged them. -->
 
-[Write 1–2 short paragraphs here about who gained, who lost, and what the gray DNF bars tell you.]
+From this chart, we can see that Gasly gained the most places of any driver, while Norris lost the most places among drivers who finished the race. Leclerc’s −16 looks worse than Norris’s, but because we flagged him as a DNF, we know that drop came from retiring, not from being passed. The DNFs also help explain Gasly’s big gain: starting near the back, he moved up automatically when three cars ahead of him retired, so roughly 8 of his 11 places came from racing.
+
+It’s also worth noticing that Verstappen, Pérez, and Sainz show no change at all. A driver who starts on pole can’t gain places, so this metric naturally favors drivers who start further back.
 
 Keep one limitation in mind: the `grid` column is the **starting grid**, not the raw qualifying result. If a driver received a grid penalty, their grid position may be worse than where they qualified, which can make their race look better than it was.
 
@@ -162,7 +175,7 @@ Keep one limitation in mind: the `grid` column is the **starting grid**, not the
 
 With just a merge, one subtraction, and a sort, we turned three separate CSV files into a clear picture of who had the best race day. The same pattern (subtract two columns, sort, plot) works for any "before vs. after" comparison, like test scores before and after a study session or prices before and after a sale.
 
-**Your turn:** change `YEAR` and `RACE` to a race you remember, especially a chaotic one with rain or safety cars, and see how the chart changes. For a bigger challenge, try using `.groupby("driverId")` to find each driver's **average** positions gained across a whole season. Who is the best racer when qualifying doesn't go their way?
+**Your turn:** Change `YEAR` and `RACE` to a race you remember, especially a chaotic one with rain or safety cars, and see how the chart changes. For a bigger challenge, try using `.groupby("driverId")` to find each driver's **average** positions gained across a whole season. Who is the best racer when qualifying doesn't go their way?
 
 **Resources:**
 
