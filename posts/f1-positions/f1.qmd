@@ -8,9 +8,164 @@ description: "Merge race data, calculate positions gained or lost, and chart the
 
 ## Introduction
 
+In Formula 1, where a driver *starts* doesn't decide where they *finish*. Qualifying sets the starting grid, but over a race strategy, overtakes, crashes, and penalties shuffle the order. One simple way to measure who had a great (or terrible) race day is to compare each driver's **starting grid position** with their **finishing position**.
+
+This is also a great example of a very common data-science task: **comparing two columns to create a new one**. By the end of this tutorial you will be able to:
+
+- load and **merge** data that is split across several CSV files,
+- create a new column that measures **positions gained or lost**,
+- **sort** and interpret the results, and
+- make a **bar chart** that shows who moved forward and who fell back.
+
+## The data
+
+I'm using the [Formula 1 World Championship dataset on Kaggle](https://www.kaggle.com/datasets/rohanrao/formula-1-world-championship-1950-2020), which is built from the Ergast motor racing database. Like a real database, the data is split across many CSV files that are linked by **ID columns**. We only need three of them:
+
+| File | Key columns we use | What it tells us |
+|---|---|---|
+| `results.csv` | `raceId`, `driverId`, `grid`, `position`, `positionOrder` | Where each driver started and finished in each race |
+| `drivers.csv` | `driverId`, `code`, `surname` | Who each `driverId` is |
+| `races.csv` | `raceId`, `year`, `name` | Which race each `raceId` is |
+
+`results.csv` doesn't contain driver names or race names, only ID numbers. That's why we need to **merge** it with the other two files.
+
+## Step 1: Load the files
 
 ```{python}
 import pandas as pd
+import matplotlib.pyplot as plt
+
 results = pd.read_csv("results.csv", na_values="\\N")
-results.head()
+drivers = pd.read_csv("drivers.csv", na_values="\\N")
+races   = pd.read_csv("races.csv",   na_values="\\N")
+
+results[["raceId", "driverId", "grid", "position", "positionOrder"]].head()
 ```
+
+Note: this dataset marks missing values with `\N` instead of leaving the cell blank. Passing `na_values="\\N"` tells pandas to treat those as real missing values (`NaN`). Without it, numeric columns like `position` load as text.
+
+## Step 2: Pick one race
+
+Each race has its own `raceId`. Rather than memorizing ID numbers, we can look it up in `races` by year and name:
+
+```{python}
+YEAR = 2023
+RACE = "Bahrain Grand Prix"
+
+race_id = races.loc[
+    (races["year"] == YEAR) & (races["name"] == RACE), "raceId"
+].iloc[0]
+
+race_id
+```
+
+Change `YEAR` and `RACE` to explore any other race in the dataset.
+
+## Step 3: Filter and merge
+
+Now we keep only the rows for that race and use `.merge()` to attach each driver's three-letter code (like `VER` or `HAM`) by matching on `driverId`:
+
+```{python}
+df = (
+    results[results["raceId"] == race_id]
+    .merge(drivers[["driverId", "code", "surname"]], on="driverId")
+    [["code", "surname", "grid", "position", "positionOrder"]]
+    .rename(columns={"grid": "grid_position", "positionOrder": "finish_position"})
+)
+
+df.head()
+```
+
+Notice we use `positionOrder` for the finish, not `position`. Drivers who didn't finish have a missing `position`, but `positionOrder` still ranks *every* driver, so no one gets dropped.
+
+## Step 4: Clean up two edge cases
+
+Real data is messy, so there are two things to handle before calculating anything:
+
+1. **Pit-lane starts.** A driver who starts from the pit lane has `grid = 0`. Left alone, that would make it look like they started *ahead* of pole position. We'll treat them as starting from the back of the grid.
+2. **Did not finish (DNF).** A driver who retires on lap 1 will look like they "lost" a lot of places, even though they didn't race. We'll flag those drivers so we can interpret them separately.
+
+```{python}
+n_starters = len(df)
+df["grid_position"] = df["grid_position"].replace(0, n_starters)
+
+df["classified"] = df["position"].notna()
+```
+
+## Step 5: Calculate positions gained or lost
+
+Here's the core idea. For each driver $i$, with grid position $g_i$ and finishing position $f_i$:
+
+$$
+\Delta_i = g_i - f_i
+$$
+
+Because a *lower* position number is better, the sign tells the story:
+
+- $\Delta_i > 0$: the driver **gained** places (e.g., started 10th, finished 4th → $10 - 4 = +6$)
+- $\Delta_i < 0$: the driver **lost** places
+- $\Delta_i = 0$: the driver finished where they started
+
+In pandas, subtracting two columns works row by row automatically, so this is one line:
+
+```{python}
+df["positions_changed"] = df["grid_position"] - df["finish_position"]
+
+df = df.sort_values("positions_changed", ascending=False)
+df[["code", "grid_position", "finish_position", "positions_changed", "classified"]]
+```
+
+Sorting from largest to smallest puts the biggest gainers at the top and the biggest losers at the bottom.
+
+## Step 6: Visualize it
+
+A table works, but a bar chart makes the pattern obvious at a glance. We'll color gains green, losses red, and drivers who didn't finish gray.
+
+```{python}
+#| label: fig-positions
+#| fig-cap: "Positions gained or lost from the starting grid to the finish."
+#| fig-alt: "Horizontal bar chart of each driver's change in position from grid to finish. Bars to the right in green show places gained, bars to the left in red show places lost, and gray bars mark drivers who did not finish."
+
+def bar_color(row):
+    if not row["classified"]:
+        return "lightgray"
+    if row["positions_changed"] > 0:
+        return "seagreen"
+    if row["positions_changed"] < 0:
+        return "firebrick"
+    return "gray"
+
+colors = df.apply(bar_color, axis=1)
+
+fig, ax = plt.subplots(figsize=(7, 6))
+ax.barh(df["code"], df["positions_changed"], color=colors)
+ax.axvline(0, color="black", linewidth=0.8)
+ax.invert_yaxis()  # biggest gainer at the top
+ax.set_xlabel("Positions gained (+) / lost (−)")
+ax.set_title(f"{YEAR} {RACE}: Grid vs. Finish")
+plt.tight_layout()
+plt.show()
+```
+
+## Interpreting the results
+
+<!-- Fill this in with what YOUR chart shows. Some prompts: -->
+<!-- - Who gained the most places, and why might that be? (bad qualifying, strategy, fast car) -->
+<!-- - Who lost the most among drivers who finished? -->
+<!-- - Did any DNFs make the chart look misleading? This is why we flagged them. -->
+
+[Write 1–2 short paragraphs here about who gained, who lost, and what the gray DNF bars tell you.]
+
+Keep one limitation in mind: the `grid` column is the **starting grid**, not the raw qualifying result. If a driver received a grid penalty, their grid position may be worse than where they qualified, which can make their race look better than it was.
+
+## Conclusion and next steps
+
+With just a merge, one subtraction, and a sort, we turned three separate CSV files into a clear picture of who had the best race day. The same pattern (subtract two columns, sort, plot) works for any "before vs. after" comparison, like test scores before and after a study session or prices before and after a sale.
+
+**Your turn:** change `YEAR` and `RACE` to a race you remember, especially a chaotic one with rain or safety cars, and see how the chart changes. For a bigger challenge, try using `.groupby("driverId")` to find each driver's **average** positions gained across a whole season. Who is the best racer when qualifying doesn't go their way?
+
+**Resources:**
+
+- [Kaggle: Formula 1 World Championship dataset](https://www.kaggle.com/datasets/rohanrao/formula-1-world-championship-1950-2020)
+- [pandas documentation for `DataFrame.merge`](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.merge.html)
+- [matplotlib documentation for horizontal bar charts](https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.barh.html)

@@ -49,31 +49,80 @@
     "text": "Who Gained the Most Places? Comparing F1 Grid and Finish Positions with pandas\n\n\nMerge race data, calculate positions gained or lost, and chart the results.\n\n\n\n\n\nOct 13, 2026\n\n\nIsaiah Cabrinha\n\n\n\n\n\nNo matching items"
   },
   {
-    "objectID": "posts/f1-positions/index.html",
-    "href": "posts/f1-positions/index.html",
-    "title": "Who Gained the Most Places? Comparing F1 Grid and Finish Positions with pandas",
-    "section": "",
-    "text": "import pandas as pd\nresults = pd.read_csv(\"results.csv\", na_values=\"\\\\N\")\nresults.head()\n\n\n\n\n\n\n\n\nresultId\nraceId\ndriverId\nconstructorId\nnumber\ngrid\nposition\npositionText\npositionOrder\npoints\n\n\n\n\n0\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\n\n\n1\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\n\n\n2\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\n\n\n3\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\n\n\n4\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN"
-  },
-  {
-    "objectID": "posts/f1-positions/index.html#introduction",
-    "href": "posts/f1-positions/index.html#introduction",
-    "title": "Who Gained the Most Places? Comparing F1 Grid and Finish Positions with pandas",
-    "section": "",
-    "text": "import pandas as pd\nresults = pd.read_csv(\"results.csv\", na_values=\"\\\\N\")\nresults.head()\n\n\n\n\n\n\n\n\nresultId\nraceId\ndriverId\nconstructorId\nnumber\ngrid\nposition\npositionText\npositionOrder\npoints\n\n\n\n\n0\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\n\n\n1\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\n\n\n2\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\n\n\n3\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\n\n\n4\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN\nNaN"
-  },
-  {
     "objectID": "posts/f1-positions/f1.html",
     "href": "posts/f1-positions/f1.html",
     "title": "Who Gained the Most Places? Comparing F1 Grid and Finish Positions with pandas",
     "section": "",
-    "text": "import pandas as pd\nresults = pd.read_csv(\"results.csv\", na_values=\"\\\\N\")\nresults.head()\n\n\n\n\n\n\n\n\nresultId\nraceId\ndriverId\nconstructorId\nnumber\ngrid\nposition\npositionText\npositionOrder\npoints\nlaps\ntime\nmilliseconds\nfastestLap\nrank\nfastestLapTime\nfastestLapSpeed\nstatusId\n\n\n\n\n0\n1\n18\n1\n1\n22.0\n1\n1.0\n1\n1\n10.0\n58\n1:34:50.616\n5690616.0\n39.0\n2.0\n1:27.452\n218.300\n1\n\n\n1\n2\n18\n2\n2\n3.0\n5\n2.0\n2\n2\n8.0\n58\n+5.478\n5696094.0\n41.0\n3.0\n1:27.739\n217.586\n1\n\n\n2\n3\n18\n3\n3\n7.0\n7\n3.0\n3\n3\n6.0\n58\n+8.163\n5698779.0\n41.0\n5.0\n1:28.090\n216.719\n1\n\n\n3\n4\n18\n4\n4\n5.0\n11\n4.0\n4\n4\n5.0\n58\n+17.181\n5707797.0\n58.0\n7.0\n1:28.603\n215.464\n1\n\n\n4\n5\n18\n5\n1\n23.0\n3\n5.0\n5\n5\n4.0\n58\n+18.014\n5708630.0\n43.0\n1.0\n1:27.418\n218.385\n1"
+    "text": "In Formula 1, where a driver starts doesn’t decide where they finish. Qualifying sets the starting grid, but over a race strategy, overtakes, crashes, and penalties shuffle the order. One simple way to measure who had a great (or terrible) race day is to compare each driver’s starting grid position with their finishing position.\nThis is also a great example of a very common data-science task: comparing two columns to create a new one. By the end of this tutorial you will be able to:\n\nload and merge data that is split across several CSV files,\ncreate a new column that measures positions gained or lost,\nsort and interpret the results, and\nmake a bar chart that shows who moved forward and who fell back."
   },
   {
     "objectID": "posts/f1-positions/f1.html#introduction",
     "href": "posts/f1-positions/f1.html#introduction",
     "title": "Who Gained the Most Places? Comparing F1 Grid and Finish Positions with pandas",
     "section": "",
-    "text": "import pandas as pd\nresults = pd.read_csv(\"results.csv\", na_values=\"\\\\N\")\nresults.head()\n\n\n\n\n\n\n\n\nresultId\nraceId\ndriverId\nconstructorId\nnumber\ngrid\nposition\npositionText\npositionOrder\npoints\nlaps\ntime\nmilliseconds\nfastestLap\nrank\nfastestLapTime\nfastestLapSpeed\nstatusId\n\n\n\n\n0\n1\n18\n1\n1\n22.0\n1\n1.0\n1\n1\n10.0\n58\n1:34:50.616\n5690616.0\n39.0\n2.0\n1:27.452\n218.300\n1\n\n\n1\n2\n18\n2\n2\n3.0\n5\n2.0\n2\n2\n8.0\n58\n+5.478\n5696094.0\n41.0\n3.0\n1:27.739\n217.586\n1\n\n\n2\n3\n18\n3\n3\n7.0\n7\n3.0\n3\n3\n6.0\n58\n+8.163\n5698779.0\n41.0\n5.0\n1:28.090\n216.719\n1\n\n\n3\n4\n18\n4\n4\n5.0\n11\n4.0\n4\n4\n5.0\n58\n+17.181\n5707797.0\n58.0\n7.0\n1:28.603\n215.464\n1\n\n\n4\n5\n18\n5\n1\n23.0\n3\n5.0\n5\n5\n4.0\n58\n+18.014\n5708630.0\n43.0\n1.0\n1:27.418\n218.385\n1"
+    "text": "In Formula 1, where a driver starts doesn’t decide where they finish. Qualifying sets the starting grid, but over a race strategy, overtakes, crashes, and penalties shuffle the order. One simple way to measure who had a great (or terrible) race day is to compare each driver’s starting grid position with their finishing position.\nThis is also a great example of a very common data-science task: comparing two columns to create a new one. By the end of this tutorial you will be able to:\n\nload and merge data that is split across several CSV files,\ncreate a new column that measures positions gained or lost,\nsort and interpret the results, and\nmake a bar chart that shows who moved forward and who fell back."
+  },
+  {
+    "objectID": "posts/f1-positions/f1.html#the-data",
+    "href": "posts/f1-positions/f1.html#the-data",
+    "title": "Who Gained the Most Places? Comparing F1 Grid and Finish Positions with pandas",
+    "section": "The data",
+    "text": "The data\nI’m using the Formula 1 World Championship dataset on Kaggle, which is built from the Ergast motor racing database. Like a real database, the data is split across many CSV files that are linked by ID columns. We only need three of them:\n\n\n\n\n\n\n\n\nFile\nKey columns we use\nWhat it tells us\n\n\n\n\nresults.csv\nraceId, driverId, grid, position, positionOrder\nWhere each driver started and finished in each race\n\n\ndrivers.csv\ndriverId, code, surname\nWho each driverId is\n\n\nraces.csv\nraceId, year, name\nWhich race each raceId is\n\n\n\nresults.csv doesn’t contain driver names or race names, only ID numbers. That’s why we need to merge it with the other two files."
+  },
+  {
+    "objectID": "posts/f1-positions/f1.html#step-1-load-the-files",
+    "href": "posts/f1-positions/f1.html#step-1-load-the-files",
+    "title": "Who Gained the Most Places? Comparing F1 Grid and Finish Positions with pandas",
+    "section": "Step 1: Load the files",
+    "text": "Step 1: Load the files\n\nimport pandas as pd\nimport matplotlib.pyplot as plt\n\nresults = pd.read_csv(\"results.csv\", na_values=\"\\\\N\")\ndrivers = pd.read_csv(\"drivers.csv\", na_values=\"\\\\N\")\nraces   = pd.read_csv(\"races.csv\",   na_values=\"\\\\N\")\n\nresults[[\"raceId\", \"driverId\", \"grid\", \"position\", \"positionOrder\"]].head()\n\n\n\n\n\n\n\n\nraceId\ndriverId\ngrid\nposition\npositionOrder\n\n\n\n\n0\n18\n1\n1\n1.0\n1\n\n\n1\n18\n2\n5\n2.0\n2\n\n\n2\n18\n3\n7\n3.0\n3\n\n\n3\n18\n4\n11\n4.0\n4\n\n\n4\n18\n5\n3\n5.0\n5\n\n\n\n\n\n\n\nNote: this dataset marks missing values with \\N instead of leaving the cell blank. Passing na_values=\"\\\\N\" tells pandas to treat those as real missing values (NaN). Without it, numeric columns like position load as text."
+  },
+  {
+    "objectID": "posts/f1-positions/f1.html#step-2-pick-one-race",
+    "href": "posts/f1-positions/f1.html#step-2-pick-one-race",
+    "title": "Who Gained the Most Places? Comparing F1 Grid and Finish Positions with pandas",
+    "section": "Step 2: Pick one race",
+    "text": "Step 2: Pick one race\nEach race has its own raceId. Rather than memorizing ID numbers, we can look it up in races by year and name:\n\nYEAR = 2023\nRACE = \"Bahrain Grand Prix\"\n\nrace_id = races.loc[\n    (races[\"year\"] == YEAR) & (races[\"name\"] == RACE), \"raceId\"\n].iloc[0]\n\nrace_id\n\nnp.int64(1098)\n\n\nChange YEAR and RACE to explore any other race in the dataset."
+  },
+  {
+    "objectID": "posts/f1-positions/f1.html#step-3-filter-and-merge",
+    "href": "posts/f1-positions/f1.html#step-3-filter-and-merge",
+    "title": "Who Gained the Most Places? Comparing F1 Grid and Finish Positions with pandas",
+    "section": "Step 3: Filter and merge",
+    "text": "Step 3: Filter and merge\nNow we keep only the rows for that race and use .merge() to attach each driver’s three-letter code (like VER or HAM) by matching on driverId:\n\ndf = (\n    results[results[\"raceId\"] == race_id]\n    .merge(drivers[[\"driverId\", \"code\", \"surname\"]], on=\"driverId\")\n    [[\"code\", \"surname\", \"grid\", \"position\", \"positionOrder\"]]\n    .rename(columns={\"grid\": \"grid_position\", \"positionOrder\": \"finish_position\"})\n)\n\ndf.head()\n\n\n\n\n\n\n\n\ncode\nsurname\ngrid_position\nposition\nfinish_position\n\n\n\n\n0\nVER\nVerstappen\n1\n1.0\n1\n\n\n1\nPER\nPérez\n2\n2.0\n2\n\n\n2\nALO\nAlonso\n5\n3.0\n3\n\n\n3\nSAI\nSainz\n4\n4.0\n4\n\n\n4\nHAM\nHamilton\n7\n5.0\n5\n\n\n\n\n\n\n\nNotice we use positionOrder for the finish, not position. Drivers who didn’t finish have a missing position, but positionOrder still ranks every driver, so no one gets dropped."
+  },
+  {
+    "objectID": "posts/f1-positions/f1.html#step-4-clean-up-two-edge-cases",
+    "href": "posts/f1-positions/f1.html#step-4-clean-up-two-edge-cases",
+    "title": "Who Gained the Most Places? Comparing F1 Grid and Finish Positions with pandas",
+    "section": "Step 4: Clean up two edge cases",
+    "text": "Step 4: Clean up two edge cases\nReal data is messy, so there are two things to handle before calculating anything:\n\nPit-lane starts. A driver who starts from the pit lane has grid = 0. Left alone, that would make it look like they started ahead of pole position. We’ll treat them as starting from the back of the grid.\nDid not finish (DNF). A driver who retires on lap 1 will look like they “lost” a lot of places, even though they didn’t race. We’ll flag those drivers so we can interpret them separately.\n\n\nn_starters = len(df)\ndf[\"grid_position\"] = df[\"grid_position\"].replace(0, n_starters)\n\ndf[\"classified\"] = df[\"position\"].notna()"
+  },
+  {
+    "objectID": "posts/f1-positions/f1.html#step-5-calculate-positions-gained-or-lost",
+    "href": "posts/f1-positions/f1.html#step-5-calculate-positions-gained-or-lost",
+    "title": "Who Gained the Most Places? Comparing F1 Grid and Finish Positions with pandas",
+    "section": "Step 5: Calculate positions gained or lost",
+    "text": "Step 5: Calculate positions gained or lost\nHere’s the core idea. For each driver \\(i\\), with grid position \\(g_i\\) and finishing position \\(f_i\\):\n\\[\n\\Delta_i = g_i - f_i\n\\]\nBecause a lower position number is better, the sign tells the story:\n\n\\(\\Delta_i &gt; 0\\): the driver gained places (e.g., started 10th, finished 4th → \\(10 - 4 = +6\\))\n\\(\\Delta_i &lt; 0\\): the driver lost places\n\\(\\Delta_i = 0\\): the driver finished where they started\n\nIn pandas, subtracting two columns works row by row automatically, so this is one line:\n\ndf[\"positions_changed\"] = df[\"grid_position\"] - df[\"finish_position\"]\n\ndf = df.sort_values(\"positions_changed\", ascending=False)\ndf[[\"code\", \"grid_position\", \"finish_position\", \"positions_changed\", \"classified\"]]\n\n\n\n\n\n\n\n\ncode\ngrid_position\nfinish_position\npositions_changed\nclassified\n\n\n\n\n8\nGAS\n20\n9\n11\nTrue\n\n\n9\nALB\n15\n10\n5\nTrue\n\n\n13\nDEV\n19\n14\n5\nTrue\n\n\n7\nBOT\n12\n8\n4\nTrue\n\n\n12\nMAG\n17\n13\n4\nTrue\n\n\n11\nSAR\n16\n12\n4\nTrue\n\n\n10\nTSU\n14\n11\n3\nTrue\n\n\n2\nALO\n5\n3\n2\nTrue\n\n\n5\nSTR\n8\n6\n2\nTrue\n\n\n4\nHAM\n7\n5\n2\nTrue\n\n\n0\nVER\n1\n1\n0\nTrue\n\n\n1\nPER\n2\n2\n0\nTrue\n\n\n3\nSAI\n4\n4\n0\nTrue\n\n\n6\nRUS\n6\n7\n-1\nTrue\n\n\n19\nPIA\n18\n20\n-2\nFalse\n\n\n15\nZHO\n13\n16\n-3\nTrue\n\n\n14\nHUL\n10\n15\n-5\nTrue\n\n\n16\nNOR\n11\n17\n-6\nTrue\n\n\n17\nOCO\n9\n18\n-9\nFalse\n\n\n18\nLEC\n3\n19\n-16\nFalse\n\n\n\n\n\n\n\nSorting from largest to smallest puts the biggest gainers at the top and the biggest losers at the bottom."
+  },
+  {
+    "objectID": "posts/f1-positions/f1.html#step-6-visualize-it",
+    "href": "posts/f1-positions/f1.html#step-6-visualize-it",
+    "title": "Who Gained the Most Places? Comparing F1 Grid and Finish Positions with pandas",
+    "section": "Step 6: Visualize it",
+    "text": "Step 6: Visualize it\nA table works, but a bar chart makes the pattern obvious at a glance. We’ll color gains green, losses red, and drivers who didn’t finish gray.\n\ndef bar_color(row):\n    if not row[\"classified\"]:\n        return \"lightgray\"\n    if row[\"positions_changed\"] &gt; 0:\n        return \"seagreen\"\n    if row[\"positions_changed\"] &lt; 0:\n        return \"firebrick\"\n    return \"gray\"\n\ncolors = df.apply(bar_color, axis=1)\n\nfig, ax = plt.subplots(figsize=(7, 6))\nax.barh(df[\"code\"], df[\"positions_changed\"], color=colors)\nax.axvline(0, color=\"black\", linewidth=0.8)\nax.invert_yaxis()  # biggest gainer at the top\nax.set_xlabel(\"Positions gained (+) / lost (−)\")\nax.set_title(f\"{YEAR} {RACE}: Grid vs. Finish\")\nplt.tight_layout()\nplt.show()\n\n\n\n\n\n\n\nFigure 1: Positions gained or lost from the starting grid to the finish."
+  },
+  {
+    "objectID": "posts/f1-positions/f1.html#interpreting-the-results",
+    "href": "posts/f1-positions/f1.html#interpreting-the-results",
+    "title": "Who Gained the Most Places? Comparing F1 Grid and Finish Positions with pandas",
+    "section": "Interpreting the results",
+    "text": "Interpreting the results\n\n\n\n\n[Write 1–2 short paragraphs here about who gained, who lost, and what the gray DNF bars tell you.]\nKeep one limitation in mind: the grid column is the starting grid, not the raw qualifying result. If a driver received a grid penalty, their grid position may be worse than where they qualified, which can make their race look better than it was."
+  },
+  {
+    "objectID": "posts/f1-positions/f1.html#conclusion-and-next-steps",
+    "href": "posts/f1-positions/f1.html#conclusion-and-next-steps",
+    "title": "Who Gained the Most Places? Comparing F1 Grid and Finish Positions with pandas",
+    "section": "Conclusion and next steps",
+    "text": "Conclusion and next steps\nWith just a merge, one subtraction, and a sort, we turned three separate CSV files into a clear picture of who had the best race day. The same pattern (subtract two columns, sort, plot) works for any “before vs. after” comparison, like test scores before and after a study session or prices before and after a sale.\nYour turn: change YEAR and RACE to a race you remember, especially a chaotic one with rain or safety cars, and see how the chart changes. For a bigger challenge, try using .groupby(\"driverId\") to find each driver’s average positions gained across a whole season. Who is the best racer when qualifying doesn’t go their way?\nResources:\n\nKaggle: Formula 1 World Championship dataset\npandas documentation for DataFrame.merge\nmatplotlib documentation for horizontal bar charts"
   }
 ]

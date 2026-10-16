@@ -113,8 +113,40 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 }</script>
 <script src="https://cdn.jsdelivr.net/npm/requirejs@2.3.6/require.min.js" integrity="sha384-c9c+LnTbwQ3aujuU7ULEPVvgLs+Fn6fJUvIGTsuu1ZcCf11fiEubah0ttpca4ntM sha384-6V1/AdqZRWk1KAlWbKBlGhN7VG4iE/yAZcO6NZPMF8od0vukrvr0tg4qY6NSrItx" crossorigin="anonymous"></script>
 
+
+
 <script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../../styles.css">
 </head>
@@ -169,6 +201,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
    
   <ul>
   <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#the-data" id="toc-the-data" class="nav-link" data-scroll-target="#the-data">The data</a></li>
+  <li><a href="#step-1-load-the-files" id="toc-step-1-load-the-files" class="nav-link" data-scroll-target="#step-1-load-the-files">Step 1: Load the files</a></li>
+  <li><a href="#step-2-pick-one-race" id="toc-step-2-pick-one-race" class="nav-link" data-scroll-target="#step-2-pick-one-race">Step 2: Pick one race</a></li>
+  <li><a href="#step-3-filter-and-merge" id="toc-step-3-filter-and-merge" class="nav-link" data-scroll-target="#step-3-filter-and-merge">Step 3: Filter and merge</a></li>
+  <li><a href="#step-4-clean-up-two-edge-cases" id="toc-step-4-clean-up-two-edge-cases" class="nav-link" data-scroll-target="#step-4-clean-up-two-edge-cases">Step 4: Clean up two edge cases</a></li>
+  <li><a href="#step-5-calculate-positions-gained-or-lost" id="toc-step-5-calculate-positions-gained-or-lost" class="nav-link" data-scroll-target="#step-5-calculate-positions-gained-or-lost">Step 5: Calculate positions gained or lost</a></li>
+  <li><a href="#step-6-visualize-it" id="toc-step-6-visualize-it" class="nav-link" data-scroll-target="#step-6-visualize-it">Step 6: Visualize it</a></li>
+  <li><a href="#interpreting-the-results" id="toc-interpreting-the-results" class="nav-link" data-scroll-target="#interpreting-the-results">Interpreting the results</a></li>
+  <li><a href="#conclusion-and-next-steps" id="toc-conclusion-and-next-steps" class="nav-link" data-scroll-target="#conclusion-and-next-steps">Conclusion and next steps</a></li>
   </ul>
 </nav>
     </div>
@@ -218,10 +259,62 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="introduction" class="level2">
 <h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
-<div id="64598033" class="cell" data-execution_count="1">
+<p>In Formula 1, where a driver <em>starts</em> doesn’t decide where they <em>finish</em>. Qualifying sets the starting grid, but over a race strategy, overtakes, crashes, and penalties shuffle the order. One simple way to measure who had a great (or terrible) race day is to compare each driver’s <strong>starting grid position</strong> with their <strong>finishing position</strong>.</p>
+<p>This is also a great example of a very common data-science task: <strong>comparing two columns to create a new one</strong>. By the end of this tutorial you will be able to:</p>
+<ul>
+<li>load and <strong>merge</strong> data that is split across several CSV files,</li>
+<li>create a new column that measures <strong>positions gained or lost</strong>,</li>
+<li><strong>sort</strong> and interpret the results, and</li>
+<li>make a <strong>bar chart</strong> that shows who moved forward and who fell back.</li>
+</ul>
+</section>
+<section id="the-data" class="level2">
+<h2 class="anchored" data-anchor-id="the-data">The data</h2>
+<p>I’m using the <a href="https://www.kaggle.com/datasets/rohanrao/formula-1-world-championship-1950-2020">Formula 1 World Championship dataset on Kaggle</a>, which is built from the Ergast motor racing database. Like a real database, the data is split across many CSV files that are linked by <strong>ID columns</strong>. We only need three of them:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>File</th>
+<th>Key columns we use</th>
+<th>What it tells us</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>results.csv</code></td>
+<td><code>raceId</code>, <code>driverId</code>, <code>grid</code>, <code>position</code>, <code>positionOrder</code></td>
+<td>Where each driver started and finished in each race</td>
+</tr>
+<tr class="even">
+<td><code>drivers.csv</code></td>
+<td><code>driverId</code>, <code>code</code>, <code>surname</code></td>
+<td>Who each <code>driverId</code> is</td>
+</tr>
+<tr class="odd">
+<td><code>races.csv</code></td>
+<td><code>raceId</code>, <code>year</code>, <code>name</code></td>
+<td>Which race each <code>raceId</code> is</td>
+</tr>
+</tbody>
+</table>
+<p><code>results.csv</code> doesn’t contain driver names or race names, only ID numbers. That’s why we need to <strong>merge</strong> it with the other two files.</p>
+</section>
+<section id="step-1-load-the-files" class="level2">
+<h2 class="anchored" data-anchor-id="step-1-load-the-files">Step 1: Load the files</h2>
+<div id="2a79a742" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>results <span class="op">=</span> pd.read_csv(<span class="st">"results.csv"</span>, na_values<span class="op">=</span><span class="st">"</span><span class="ch">\\</span><span class="st">N"</span>)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>results.head()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>results <span class="op">=</span> pd.read_csv(<span class="st">"results.csv"</span>, na_values<span class="op">=</span><span class="st">"</span><span class="ch">\\</span><span class="st">N"</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>drivers <span class="op">=</span> pd.read_csv(<span class="st">"drivers.csv"</span>, na_values<span class="op">=</span><span class="st">"</span><span class="ch">\\</span><span class="st">N"</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>races   <span class="op">=</span> pd.read_csv(<span class="st">"races.csv"</span>,   na_values<span class="op">=</span><span class="st">"</span><span class="ch">\\</span><span class="st">N"</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>results[[<span class="st">"raceId"</span>, <span class="st">"driverId"</span>, <span class="st">"grid"</span>, <span class="st">"position"</span>, <span class="st">"positionOrder"</span>]].head()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="1">
 <div>
 
@@ -230,131 +323,53 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <thead>
 <tr class="header">
 <th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th">resultId</th>
 <th data-quarto-table-cell-role="th">raceId</th>
 <th data-quarto-table-cell-role="th">driverId</th>
-<th data-quarto-table-cell-role="th">constructorId</th>
-<th data-quarto-table-cell-role="th">number</th>
 <th data-quarto-table-cell-role="th">grid</th>
 <th data-quarto-table-cell-role="th">position</th>
-<th data-quarto-table-cell-role="th">positionText</th>
 <th data-quarto-table-cell-role="th">positionOrder</th>
-<th data-quarto-table-cell-role="th">points</th>
-<th data-quarto-table-cell-role="th">laps</th>
-<th data-quarto-table-cell-role="th">time</th>
-<th data-quarto-table-cell-role="th">milliseconds</th>
-<th data-quarto-table-cell-role="th">fastestLap</th>
-<th data-quarto-table-cell-role="th">rank</th>
-<th data-quarto-table-cell-role="th">fastestLapTime</th>
-<th data-quarto-table-cell-role="th">fastestLapSpeed</th>
-<th data-quarto-table-cell-role="th">statusId</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <th data-quarto-table-cell-role="th">0</th>
-<td>1</td>
 <td>18</td>
 <td>1</td>
 <td>1</td>
-<td>22.0</td>
-<td>1</td>
 <td>1.0</td>
-<td>1</td>
-<td>1</td>
-<td>10.0</td>
-<td>58</td>
-<td>1:34:50.616</td>
-<td>5690616.0</td>
-<td>39.0</td>
-<td>2.0</td>
-<td>1:27.452</td>
-<td>218.300</td>
 <td>1</td>
 </tr>
 <tr class="even">
 <th data-quarto-table-cell-role="th">1</th>
-<td>2</td>
 <td>18</td>
 <td>2</td>
-<td>2</td>
-<td>3.0</td>
 <td>5</td>
 <td>2.0</td>
 <td>2</td>
-<td>2</td>
-<td>8.0</td>
-<td>58</td>
-<td>+5.478</td>
-<td>5696094.0</td>
-<td>41.0</td>
-<td>3.0</td>
-<td>1:27.739</td>
-<td>217.586</td>
-<td>1</td>
 </tr>
 <tr class="odd">
 <th data-quarto-table-cell-role="th">2</th>
-<td>3</td>
 <td>18</td>
 <td>3</td>
-<td>3</td>
-<td>7.0</td>
 <td>7</td>
 <td>3.0</td>
 <td>3</td>
-<td>3</td>
-<td>6.0</td>
-<td>58</td>
-<td>+8.163</td>
-<td>5698779.0</td>
-<td>41.0</td>
-<td>5.0</td>
-<td>1:28.090</td>
-<td>216.719</td>
-<td>1</td>
 </tr>
 <tr class="even">
 <th data-quarto-table-cell-role="th">3</th>
-<td>4</td>
 <td>18</td>
 <td>4</td>
-<td>4</td>
-<td>5.0</td>
 <td>11</td>
 <td>4.0</td>
 <td>4</td>
-<td>4</td>
-<td>5.0</td>
-<td>58</td>
-<td>+17.181</td>
-<td>5707797.0</td>
-<td>58.0</td>
-<td>7.0</td>
-<td>1:28.603</td>
-<td>215.464</td>
-<td>1</td>
 </tr>
 <tr class="odd">
 <th data-quarto-table-cell-role="th">4</th>
-<td>5</td>
 <td>18</td>
 <td>5</td>
-<td>1</td>
-<td>23.0</td>
 <td>3</td>
 <td>5.0</td>
 <td>5</td>
-<td>5</td>
-<td>4.0</td>
-<td>58</td>
-<td>+18.014</td>
-<td>5708630.0</td>
-<td>43.0</td>
-<td>1.0</td>
-<td>1:27.418</td>
-<td>218.385</td>
-<td>1</td>
 </tr>
 </tbody>
 </table>
@@ -362,6 +377,374 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
+<p>Note: this dataset marks missing values with <code>\N</code> instead of leaving the cell blank. Passing <code>na_values="\\N"</code> tells pandas to treat those as real missing values (<code>NaN</code>). Without it, numeric columns like <code>position</code> load as text.</p>
+</section>
+<section id="step-2-pick-one-race" class="level2">
+<h2 class="anchored" data-anchor-id="step-2-pick-one-race">Step 2: Pick one race</h2>
+<p>Each race has its own <code>raceId</code>. Rather than memorizing ID numbers, we can look it up in <code>races</code> by year and name:</p>
+<div id="ba6c0bd4" class="cell" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>YEAR <span class="op">=</span> <span class="dv">2023</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>RACE <span class="op">=</span> <span class="st">"Bahrain Grand Prix"</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>race_id <span class="op">=</span> races.loc[</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    (races[<span class="st">"year"</span>] <span class="op">==</span> YEAR) <span class="op">&amp;</span> (races[<span class="st">"name"</span>] <span class="op">==</span> RACE), <span class="st">"raceId"</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>].iloc[<span class="dv">0</span>]</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>race_id</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="2">
+<pre><code>np.int64(1098)</code></pre>
+</div>
+</div>
+<p>Change <code>YEAR</code> and <code>RACE</code> to explore any other race in the dataset.</p>
+</section>
+<section id="step-3-filter-and-merge" class="level2">
+<h2 class="anchored" data-anchor-id="step-3-filter-and-merge">Step 3: Filter and merge</h2>
+<p>Now we keep only the rows for that race and use <code>.merge()</code> to attach each driver’s three-letter code (like <code>VER</code> or <code>HAM</code>) by matching on <code>driverId</code>:</p>
+<div id="91aa9662" class="cell" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> (</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    results[results[<span class="st">"raceId"</span>] <span class="op">==</span> race_id]</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    .merge(drivers[[<span class="st">"driverId"</span>, <span class="st">"code"</span>, <span class="st">"surname"</span>]], on<span class="op">=</span><span class="st">"driverId"</span>)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    [[<span class="st">"code"</span>, <span class="st">"surname"</span>, <span class="st">"grid"</span>, <span class="st">"position"</span>, <span class="st">"positionOrder"</span>]]</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    .rename(columns<span class="op">=</span>{<span class="st">"grid"</span>: <span class="st">"grid_position"</span>, <span class="st">"positionOrder"</span>: <span class="st">"finish_position"</span>})</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>df.head()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="3">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">code</th>
+<th data-quarto-table-cell-role="th">surname</th>
+<th data-quarto-table-cell-role="th">grid_position</th>
+<th data-quarto-table-cell-role="th">position</th>
+<th data-quarto-table-cell-role="th">finish_position</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>VER</td>
+<td>Verstappen</td>
+<td>1</td>
+<td>1.0</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>PER</td>
+<td>Pérez</td>
+<td>2</td>
+<td>2.0</td>
+<td>2</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>ALO</td>
+<td>Alonso</td>
+<td>5</td>
+<td>3.0</td>
+<td>3</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">3</th>
+<td>SAI</td>
+<td>Sainz</td>
+<td>4</td>
+<td>4.0</td>
+<td>4</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">4</th>
+<td>HAM</td>
+<td>Hamilton</td>
+<td>7</td>
+<td>5.0</td>
+<td>5</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>Notice we use <code>positionOrder</code> for the finish, not <code>position</code>. Drivers who didn’t finish have a missing <code>position</code>, but <code>positionOrder</code> still ranks <em>every</em> driver, so no one gets dropped.</p>
+</section>
+<section id="step-4-clean-up-two-edge-cases" class="level2">
+<h2 class="anchored" data-anchor-id="step-4-clean-up-two-edge-cases">Step 4: Clean up two edge cases</h2>
+<p>Real data is messy, so there are two things to handle before calculating anything:</p>
+<ol type="1">
+<li><strong>Pit-lane starts.</strong> A driver who starts from the pit lane has <code>grid = 0</code>. Left alone, that would make it look like they started <em>ahead</em> of pole position. We’ll treat them as starting from the back of the grid.</li>
+<li><strong>Did not finish (DNF).</strong> A driver who retires on lap 1 will look like they “lost” a lot of places, even though they didn’t race. We’ll flag those drivers so we can interpret them separately.</li>
+</ol>
+<div id="8682a9fa" class="cell" data-execution_count="4">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>n_starters <span class="op">=</span> <span class="bu">len</span>(df)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"grid_position"</span>] <span class="op">=</span> df[<span class="st">"grid_position"</span>].replace(<span class="dv">0</span>, n_starters)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"classified"</span>] <span class="op">=</span> df[<span class="st">"position"</span>].notna()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="step-5-calculate-positions-gained-or-lost" class="level2">
+<h2 class="anchored" data-anchor-id="step-5-calculate-positions-gained-or-lost">Step 5: Calculate positions gained or lost</h2>
+<p>Here’s the core idea. For each driver <span class="math inline">\(i\)</span>, with grid position <span class="math inline">\(g_i\)</span> and finishing position <span class="math inline">\(f_i\)</span>:</p>
+<p><span class="math display">\[
+\Delta_i = g_i - f_i
+\]</span></p>
+<p>Because a <em>lower</em> position number is better, the sign tells the story:</p>
+<ul>
+<li><span class="math inline">\(\Delta_i &gt; 0\)</span>: the driver <strong>gained</strong> places (e.g., started 10th, finished 4th → <span class="math inline">\(10 - 4 = +6\)</span>)</li>
+<li><span class="math inline">\(\Delta_i &lt; 0\)</span>: the driver <strong>lost</strong> places</li>
+<li><span class="math inline">\(\Delta_i = 0\)</span>: the driver finished where they started</li>
+</ul>
+<p>In pandas, subtracting two columns works row by row automatically, so this is one line:</p>
+<div id="133d0214" class="cell" data-execution_count="5">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"positions_changed"</span>] <span class="op">=</span> df[<span class="st">"grid_position"</span>] <span class="op">-</span> df[<span class="st">"finish_position"</span>]</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df.sort_values(<span class="st">"positions_changed"</span>, ascending<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>df[[<span class="st">"code"</span>, <span class="st">"grid_position"</span>, <span class="st">"finish_position"</span>, <span class="st">"positions_changed"</span>, <span class="st">"classified"</span>]]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="5">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">code</th>
+<th data-quarto-table-cell-role="th">grid_position</th>
+<th data-quarto-table-cell-role="th">finish_position</th>
+<th data-quarto-table-cell-role="th">positions_changed</th>
+<th data-quarto-table-cell-role="th">classified</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">8</th>
+<td>GAS</td>
+<td>20</td>
+<td>9</td>
+<td>11</td>
+<td>True</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">9</th>
+<td>ALB</td>
+<td>15</td>
+<td>10</td>
+<td>5</td>
+<td>True</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">13</th>
+<td>DEV</td>
+<td>19</td>
+<td>14</td>
+<td>5</td>
+<td>True</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">7</th>
+<td>BOT</td>
+<td>12</td>
+<td>8</td>
+<td>4</td>
+<td>True</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">12</th>
+<td>MAG</td>
+<td>17</td>
+<td>13</td>
+<td>4</td>
+<td>True</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">11</th>
+<td>SAR</td>
+<td>16</td>
+<td>12</td>
+<td>4</td>
+<td>True</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">10</th>
+<td>TSU</td>
+<td>14</td>
+<td>11</td>
+<td>3</td>
+<td>True</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">2</th>
+<td>ALO</td>
+<td>5</td>
+<td>3</td>
+<td>2</td>
+<td>True</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">5</th>
+<td>STR</td>
+<td>8</td>
+<td>6</td>
+<td>2</td>
+<td>True</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">4</th>
+<td>HAM</td>
+<td>7</td>
+<td>5</td>
+<td>2</td>
+<td>True</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>VER</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>True</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>PER</td>
+<td>2</td>
+<td>2</td>
+<td>0</td>
+<td>True</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">3</th>
+<td>SAI</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>True</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">6</th>
+<td>RUS</td>
+<td>6</td>
+<td>7</td>
+<td>-1</td>
+<td>True</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">19</th>
+<td>PIA</td>
+<td>18</td>
+<td>20</td>
+<td>-2</td>
+<td>False</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">15</th>
+<td>ZHO</td>
+<td>13</td>
+<td>16</td>
+<td>-3</td>
+<td>True</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">14</th>
+<td>HUL</td>
+<td>10</td>
+<td>15</td>
+<td>-5</td>
+<td>True</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">16</th>
+<td>NOR</td>
+<td>11</td>
+<td>17</td>
+<td>-6</td>
+<td>True</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">17</th>
+<td>OCO</td>
+<td>9</td>
+<td>18</td>
+<td>-9</td>
+<td>False</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">18</th>
+<td>LEC</td>
+<td>3</td>
+<td>19</td>
+<td>-16</td>
+<td>False</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>Sorting from largest to smallest puts the biggest gainers at the top and the biggest losers at the bottom.</p>
+</section>
+<section id="step-6-visualize-it" class="level2">
+<h2 class="anchored" data-anchor-id="step-6-visualize-it">Step 6: Visualize it</h2>
+<p>A table works, but a bar chart makes the pattern obvious at a glance. We’ll color gains green, losses red, and drivers who didn’t finish gray.</p>
+<div id="cell-fig-positions" class="cell" data-execution_count="6">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> bar_color(row):</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> row[<span class="st">"classified"</span>]:</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">"lightgray"</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> row[<span class="st">"positions_changed"</span>] <span class="op">&gt;</span> <span class="dv">0</span>:</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">"seagreen"</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> row[<span class="st">"positions_changed"</span>] <span class="op">&lt;</span> <span class="dv">0</span>:</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">"firebrick"</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="st">"gray"</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>colors <span class="op">=</span> df.<span class="bu">apply</span>(bar_color, axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="dv">6</span>))</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>ax.barh(df[<span class="st">"code"</span>], df[<span class="st">"positions_changed"</span>], color<span class="op">=</span>colors)</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>ax.axvline(<span class="dv">0</span>, color<span class="op">=</span><span class="st">"black"</span>, linewidth<span class="op">=</span><span class="fl">0.8</span>)</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>ax.invert_yaxis()  <span class="co"># biggest gainer at the top</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"Positions gained (+) / lost (−)"</span>)</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="ss">f"</span><span class="sc">{</span>YEAR<span class="sc">}</span><span class="ss"> </span><span class="sc">{</span>RACE<span class="sc">}</span><span class="ss">: Grid vs. Finish"</span>)</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div id="fig-positions" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Horizontal bar chart of each driver's change in position from grid to finish. Bars to the right in green show places gained, bars to the left in red show places lost, and gray bars mark drivers who did not finish.">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-positions-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="f1_files/figure-html/fig-positions-output-1.png" alt="Horizontal bar chart of each driver's change in position from grid to finish. Bars to the right in green show places gained, bars to the left in red show places lost, and gray bars mark drivers who did not finish." width="663" height="566" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-positions-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Positions gained or lost from the starting grid to the finish.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="interpreting-the-results" class="level2">
+<h2 class="anchored" data-anchor-id="interpreting-the-results">Interpreting the results</h2>
+<!-- Fill this in with what YOUR chart shows. Some prompts: -->
+<!-- - Who gained the most places, and why might that be? (bad qualifying, strategy, fast car) -->
+<!-- - Who lost the most among drivers who finished? -->
+<!-- - Did any DNFs make the chart look misleading? This is why we flagged them. -->
+<p>[Write 1–2 short paragraphs here about who gained, who lost, and what the gray DNF bars tell you.]</p>
+<p>Keep one limitation in mind: the <code>grid</code> column is the <strong>starting grid</strong>, not the raw qualifying result. If a driver received a grid penalty, their grid position may be worse than where they qualified, which can make their race look better than it was.</p>
+</section>
+<section id="conclusion-and-next-steps" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion-and-next-steps">Conclusion and next steps</h2>
+<p>With just a merge, one subtraction, and a sort, we turned three separate CSV files into a clear picture of who had the best race day. The same pattern (subtract two columns, sort, plot) works for any “before vs.&nbsp;after” comparison, like test scores before and after a study session or prices before and after a sale.</p>
+<p><strong>Your turn:</strong> change <code>YEAR</code> and <code>RACE</code> to a race you remember, especially a chaotic one with rain or safety cars, and see how the chart changes. For a bigger challenge, try using <code>.groupby("driverId")</code> to find each driver’s <strong>average</strong> positions gained across a whole season. Who is the best racer when qualifying doesn’t go their way?</p>
+<p><strong>Resources:</strong></p>
+<ul>
+<li><a href="https://www.kaggle.com/datasets/rohanrao/formula-1-world-championship-1950-2020">Kaggle: Formula 1 World Championship dataset</a></li>
+<li><a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.merge.html">pandas documentation for <code>DataFrame.merge</code></a></li>
+<li><a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.barh.html">matplotlib documentation for horizontal bar charts</a></li>
+</ul>
 
 
 </section>
