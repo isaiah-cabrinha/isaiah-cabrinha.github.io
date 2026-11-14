@@ -117,7 +117,31 @@ n_families = birds["family"].nunique()
 print(f"{n_obs:,} observations · {n_species} species · {n_families} families")
 ```
 
-The full download held 28,140 observations of 336 bird species. After fixing 13 species that had been renamed since AVONET was published, every observation matched an AVONET trait record. iNaturalist lets each observer choose a license, and most keep the default non-commercial license (CC BY-NC, 62% of records) or reserve all rights (20%). Only 3,792 observations (13.5%) were released under CC0 or CC BY, which allow redistribution, so those make up the published dataset.
+### Cleaning steps and what they remove
+
+Most of the cleaning happens in the query itself. Requesting only research-grade
+observations means every record already has a date, a location, media, and a
+community-agreed species ID. I didn't drop any rows for missing values after
+download. 
+
+The full download held 28,140 observations of 336 species. Thirteen species had
+been renamed since AVONET was published. After I fixed those names by hand,
+every observation matched an AVONET trait record.
+
+These choices aren't neutral, though. The research-grade filter leaves out
+observations that never got a second, confirming ID. Those are more likely to be
+small, drab, or hard-to-identify birds, so the dataset probably leans toward
+species that are easy to recognize from a photo.
+
+Licensing creates a second filter. Each observer chooses a license, and most
+keep the default non-commercial license (CC BY-NC, 62%) or reserve all rights
+(20%). Only 3,792 observations (13.5%) are CC0 or CC BY, which allow
+redistribution, so the public CSV in the repo contains only those. **The figures
+in this post use all 28,140 observations.** If you rerun this post from the
+public file, you'll get smaller counts and possibly different patterns, because
+observers who choose open licenses may not bird in the same places or log the
+same species as everyone else. To reproduce the full dataset, run the
+acquisition script yourself.
 
 ### Bird sightings peak in April
 
@@ -202,6 +226,8 @@ The heaviest birds tell the same story from the other side. The Trumpeter Swan (
 These counts measure **where people go birding** as much as where birds are. Sightings cluster
 around cities, trails, and weekends, and colorful or large birds are easier to photograph.
 A spike in observations can mean more birds or just nicer weather.
+
+That also limits how far these results generalize. This is one year (2025) of observations from people who use iNaturalist, concentrated along the Wasatch Front and other easy-to-reach places. Remote areas, night-active birds, and species that are hard to photograph are underrepresented. The patterns here describe what Utah's iNaturalist users recorded, not the true seasonal makeup of Utah's bird populations, and a different year or a structured survey like eBird checklists could look different.
 
 ## Learn more
 
