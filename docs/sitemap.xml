@@ -2,7 +2,11 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://isaiah-cabrinha.github.io/projects.html</loc>
-    <lastmod>2026-09-25T19:01:58.051Z</lastmod>
+    <lastmod>2026-11-15T21:25:25.223Z</lastmod>
+  </url>
+  <url>
+    <loc>https://isaiah-cabrinha.github.io/projects/football-sql.html</loc>
+    <lastmod>2026-11-15T21:37:09.041Z</lastmod>
   </url>
   <url>
     <loc>https://isaiah-cabrinha.github.io/posts/f1-positions/f1.html</loc>
@@ -14,14 +18,18 @@
   </url>
   <url>
     <loc>https://isaiah-cabrinha.github.io/about.html</loc>
-    <lastmod>2026-09-25T18:58:36.760Z</lastmod>
+    <lastmod>2026-11-15T21:23:26.793Z</lastmod>
   </url>
   <url>
     <loc>https://isaiah-cabrinha.github.io/index.html</loc>
-    <lastmod>2026-09-23T16:29:46.826Z</lastmod>
+    <lastmod>2026-11-15T21:33:27.114Z</lastmod>
   </url>
   <url>
     <loc>https://isaiah-cabrinha.github.io/posts/utah-birds-blog.html</loc>
     <lastmod>2026-11-14T00:03:32.073Z</lastmod>
+  </url>
+  <url>
+    <loc>https://isaiah-cabrinha.github.io/projects/hospital-sql.html</loc>
+    <lastmod>2026-11-15T21:37:16.052Z</lastmod>
   </url>
 </urlset>

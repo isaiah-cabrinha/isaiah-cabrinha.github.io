@@ -4,14 +4,91 @@
     "href": "projects.html",
     "title": "Projects",
     "section": "",
-    "text": "Fashion Trend Research (PDF)"
+    "text": "A selection of my data work. Each card links to the full write-up."
   },
   {
-    "objectID": "projects.html#bayesian-approach-to-data-analysis",
-    "href": "projects.html#bayesian-approach-to-data-analysis",
+    "objectID": "projects.html#sql-r-reports",
+    "href": "projects.html#sql-r-reports",
     "title": "Projects",
+    "section": "SQL & R reports",
+    "text": "SQL & R reports\n\n\nPremier League Scouting Report\nSQL · R · ggplot2\nI queried a database of 5 European leagues across 7 seasons (about 12,700 matches) to find out what wins games and which players to sign. The two strongest team-level stats, chance quality created and chance quality allowed, explain about 82% of the variation in points between teams. I then built a composite score to rank 1,065 players from outside the Premier League and recommended a shortlist of five.\nRead the report (PDF) → · See the SQL →\n\n\nHospital Operations Review\nSQL · R · ggplot2\nI analyzed records of 1,500 patients, 1,000 surgeries, 2,000 stays, and 500 nurses to answer three questions from leadership: which surgeries are most common, how long patients stay, and which nurses carry the heaviest workloads. One key finding: the 17% of stays longer than a week account for 46% of all bed-days, which points to discharge planning as the best way to free up beds.\nRead the report (PDF) → · See the SQL →"
+  },
+  {
+    "objectID": "projects.html#python-projects",
+    "href": "projects.html#python-projects",
+    "title": "Projects",
+    "section": "Python projects",
+    "text": "Python projects\n\n\nWhen Do Utah’s Birds Show Up?\nPython · pandas · iNaturalist API\nI built a dataset of Utah bird sightings from iNaturalist to find out when different species arrive and leave across the year.\nRead the post →\n\n\nWho Gained the Most Places in F1?\nPython · pandas · matplotlib\nI merged race data and calculated each driver’s places gained or lost from grid to finish, then charted the results.\nRead the post →"
+  },
+  {
+    "objectID": "projects.html#statistical-modeling",
+    "href": "projects.html#statistical-modeling",
+    "title": "Projects",
+    "section": "Statistical modeling",
+    "text": "Statistical modeling\n\n\nFashion Trends: A Bayesian Approach\nBayesian statistics · R\nI used Bayesian modeling to measure how fashion trends relate to brands.\nRead the paper (PDF) →"
+  },
+  {
+    "objectID": "projects/football-sql.html",
+    "href": "projects/football-sql.html",
+    "title": "Premier League Scouting Report",
     "section": "",
-    "text": "Fashion Trend Research (PDF)"
+    "text": "The report answers four questions from a scouting department using a MySQL database of five European leagues (2014/15 to 2020/21). Each query below runs from R with DBI/RMariaDB inside a Quarto document, and the results feed the tables, charts and in-text numbers, so the report updates if the data changes.\n← Back to projects · Read the finished report (PDF)"
+  },
+  {
+    "objectID": "projects/football-sql.html#sizing-up-the-data",
+    "href": "projects/football-sql.html#sizing-up-the-data",
+    "title": "Premier League Scouting Report",
+    "section": "Sizing up the data",
+    "text": "Sizing up the data\nJoins games, leagues and appearances to count matches and distinct players per league.\n-- Size of the data by league\nSELECT l.name                     AS league,\n       MIN(g.season)              AS first_season,\n       MAX(g.season)              AS last_season,\n       COUNT(DISTINCT g.gameID)   AS matches,\n       COUNT(DISTINCT a.playerID) AS players\nFROM games g\nJOIN leagues l     ON g.leagueID = l.leagueID\nJOIN appearances a ON a.gameID   = g.gameID\nGROUP BY l.name\nORDER BY matches DESC;"
+  },
+  {
+    "objectID": "projects/football-sql.html#expected-goals-leaders",
+    "href": "projects/football-sql.html#expected-goals-leaders",
+    "title": "Premier League Scouting Report",
+    "section": "Expected goals leaders",
+    "text": "Expected goals leaders\nPer-90 rates over the last three seasons, with a minimum-minutes filter in HAVING so part-time players don’t skew the ranking.\n-- Highest expected goals per 90 minutes, last three seasons, min. 2,700 minutes\nSELECT p.name                               AS player,\n       l.name                               AS league,\n       COUNT(*)                             AS appearances,\n       SUM(a.time)                          AS minutes,\n       SUM(a.goals)                         AS goals,\n       ROUND(SUM(a.xGoals), 1)              AS xg,\n       SUM(a.xGoals) / SUM(a.time) * 90     AS xg_per90,\n       SUM(a.goals)  / SUM(a.time) * 90     AS goals_per90\nFROM appearances a\nJOIN players p ON a.playerID = p.playerID\nJOIN games   g ON a.gameID   = g.gameID\nJOIN leagues l ON a.leagueID = l.leagueID\nWHERE g.season &gt;= (SELECT MAX(season) - 2 FROM games)\nGROUP BY a.playerID, p.name, l.name\nHAVING SUM(a.time) &gt;= 2700\nORDER BY xg_per90 DESC\nLIMIT 10;"
+  },
+  {
+    "objectID": "projects/football-sql.html#assist-leaders",
+    "href": "projects/football-sql.html#assist-leaders",
+    "title": "Premier League Scouting Report",
+    "section": "Assist leaders",
+    "text": "Assist leaders\nThe same structure applied to assists and expected assists.\n-- Most assists, last three seasons\nSELECT p.name                               AS player,\n       l.name                               AS league,\n       SUM(a.time)                          AS minutes,\n       SUM(a.assists)                       AS assists,\n       ROUND(SUM(a.xAssists), 1)            AS xa,\n       SUM(a.assists) / SUM(a.time) * 90    AS assists_per90\nFROM appearances a\nJOIN players p ON a.playerID = p.playerID\nJOIN games   g ON a.gameID   = g.gameID\nJOIN leagues l ON a.leagueID = l.leagueID\nWHERE g.season &gt;= (SELECT MAX(season) - 2 FROM games)\nGROUP BY a.playerID, p.name, l.name\nORDER BY assists DESC\nLIMIT 10;"
+  },
+  {
+    "objectID": "projects/football-sql.html#key-pass-leaders",
+    "href": "projects/football-sql.html#key-pass-leaders",
+    "title": "Premier League Scouting Report",
+    "section": "Key pass leaders",
+    "text": "Key pass leaders\nKey passes per 90 as a steadier measure of chance creation.\n-- Most key passes (passes that lead directly to a shot), last three seasons\nSELECT p.name                                AS player,\n       l.name                                AS league,\n       SUM(a.time)                           AS minutes,\n       SUM(a.keyPasses)                      AS key_passes,\n       SUM(a.keyPasses) / SUM(a.time) * 90   AS key_passes_per90,\n       SUM(a.assists)                        AS assists\nFROM appearances a\nJOIN players p ON a.playerID = p.playerID\nJOIN games   g ON a.gameID   = g.gameID\nJOIN leagues l ON a.leagueID = l.leagueID\nWHERE g.season &gt;= (SELECT MAX(season) - 2 FROM games)\nGROUP BY a.playerID, p.name, l.name\nORDER BY key_passes DESC\nLIMIT 10;"
+  },
+  {
+    "objectID": "projects/football-sql.html#team-season-summaries",
+    "href": "projects/football-sql.html#team-season-summaries",
+    "title": "Premier League Scouting Report",
+    "section": "Team-season summaries",
+    "text": "Team-season summaries\nA self-join on teamstats pairs each team with its opponent in the same game, so goals and xG against can be summed next to goals and xG for. CASE turns results into points.\n-- One row per team per season, with the opponent's numbers joined on\nSELECT t.name   AS team,\n       l.name   AS league,\n       ts.season,\n       COUNT(*) AS matches,\n       SUM(CASE ts.result WHEN 'W' THEN 3 WHEN 'D' THEN 1 ELSE 0 END) AS points,\n       SUM(ts.goals)          AS goals_for,\n       SUM(opp.goals)         AS goals_against,\n       SUM(ts.xGoals)         AS xg_for,\n       SUM(opp.xGoals)        AS xg_against,\n       SUM(ts.shots)          AS shots,\n       SUM(ts.shotsOnTarget)  AS shots_on_target,\n       SUM(ts.deep)           AS deep_passes,\n       AVG(ts.ppda)           AS ppda,\n       SUM(ts.fouls)          AS fouls,\n       SUM(ts.corners)        AS corners,\n       SUM(ts.yellowCards)    AS yellow_cards\nFROM teamstats ts\nJOIN teamstats opp ON opp.gameID = ts.gameID AND opp.teamID &lt;&gt; ts.teamID\nJOIN teams   t     ON ts.teamID  = t.teamID\nJOIN games   g     ON ts.gameID  = g.gameID\nJOIN leagues l     ON g.leagueID = l.leagueID\nGROUP BY t.name, l.name, ts.season;"
+  },
+  {
+    "objectID": "projects/football-sql.html#transfer-candidates",
+    "href": "projects/football-sql.html#transfer-candidates",
+    "title": "Premier League Scouting Report",
+    "section": "Transfer candidates",
+    "text": "Transfer candidates\nOutfield players outside the Premier League with a minimum-minutes filter. A NOT IN subquery drops anyone who already played in England, and SUM(position = 'GK') = 0 excludes goalkeepers.\n-- Outfield players outside the Premier League, last two seasons, min. 2,000 minutes\nSELECT p.name                                   AS player,\n       l.name                                   AS league,\n       COUNT(*)                                 AS appearances,\n       SUM(a.time)                              AS minutes,\n       SUM(a.goals)                             AS goals,\n       SUM(a.assists)                           AS assists,\n       SUM(a.goals)         / SUM(a.time) * 90  AS goals_per90,\n       SUM(a.xGoals)        / SUM(a.time) * 90  AS xg_per90,\n       SUM(a.xAssists)      / SUM(a.time) * 90  AS xa_per90,\n       SUM(a.keyPasses)     / SUM(a.time) * 90  AS kp_per90,\n       SUM(a.xGoalsChain)   / SUM(a.time) * 90  AS xgchain_per90,\n       SUM(a.goals) - SUM(a.xGoals)             AS finishing_vs_xg\nFROM appearances a\nJOIN players p ON a.playerID = p.playerID\nJOIN games   g ON a.gameID   = g.gameID\nJOIN leagues l ON a.leagueID = l.leagueID\nWHERE g.season &gt;= (SELECT MAX(season) - 1 FROM games)\n  AND l.name &lt;&gt; 'Premier League'\n  AND a.playerID NOT IN (\n        SELECT a2.playerID\n        FROM appearances a2\n        JOIN games   g2 ON a2.gameID   = g2.gameID\n        JOIN leagues l2 ON a2.leagueID = l2.leagueID\n        WHERE l2.name = 'Premier League'\n          AND g2.season &gt;= (SELECT MAX(season) - 1 FROM games))\nGROUP BY a.playerID, p.name, l.name\nHAVING SUM(a.time) &gt;= 2000\n   AND SUM(a.position = 'GK') = 0;"
+  },
+  {
+    "objectID": "projects/football-sql.html#premier-league-benchmark",
+    "href": "projects/football-sql.html#premier-league-benchmark",
+    "title": "Premier League Scouting Report",
+    "section": "Premier League benchmark",
+    "text": "Premier League benchmark\nThe same per-90 measures for Premier League regulars, used as the bar the shortlist has to clear.\n-- Benchmark: the same measures for Premier League outfield regulars\nSELECT SUM(a.goals)     / SUM(a.time) * 90  AS goals_per90,\n       SUM(a.xGoals)    / SUM(a.time) * 90  AS xg_per90,\n       SUM(a.xAssists)  / SUM(a.time) * 90  AS xa_per90,\n       SUM(a.keyPasses) / SUM(a.time) * 90  AS kp_per90,\n       SUM(a.time)                          AS minutes,\n       a.playerID\nFROM appearances a\nJOIN games   g ON a.gameID   = g.gameID\nJOIN leagues l ON a.leagueID = l.leagueID\nWHERE g.season &gt;= (SELECT MAX(season) - 1 FROM games)\n  AND l.name = 'Premier League'\nGROUP BY a.playerID\nHAVING SUM(a.time) &gt;= 2000\n   AND SUM(a.position = 'GK') = 0;"
+  },
+  {
+    "objectID": "projects/football-sql.html#from-queries-to-report",
+    "href": "projects/football-sql.html#from-queries-to-report",
+    "title": "Premier League Scouting Report",
+    "section": "From queries to report",
+    "text": "From queries to report\nIn R I converted MySQL’s 64-bit integers to plain numbers, then used dplyr and tidyr to build per-game rates. I correlated each team stat with points per game and fit a linear model (lm(ppg ~ xG for + xG against)) that explains about 82% of the variation in points. I scored candidates by averaging their z-scores across five per-90 measures, and built every chart with ggplot2."
   },
   {
     "objectID": "posts/f1-positions/f1.html",
@@ -102,28 +179,42 @@
     "href": "about.html",
     "title": "About Me",
     "section": "",
-    "text": "Performed ETL to make data processes more efficient\n\n\n\n\n\nConstructed data reports using statistical techniques, R, Tableau, and Power BI\n\n\n\n\n\nUtilized Bayesian techniques to gain insights into fashion trends and how they relate to brands\n\n\n\n\n\n\nR\nSQL\nPython\nGit/Github\nQuarto\nStreamlit dashboards\nC++"
+    "text": "I’m a data analyst in training at Brigham Young University (BYU). What I enjoy most is the full path from raw data to a decision: writing the SQL to pull and join the data, cleaning it, analyzing it in R or Python, and building a chart, report, or dashboard that makes the answer obvious to someone who never has to see the code.\nI’m looking for data analyst roles where I can turn business questions into clear, useful answers. Outside of work I follow Formula 1 closely, which is where a lot of my practice datasets come from."
+  },
+  {
+    "objectID": "about.html#education",
+    "href": "about.html#education",
+    "title": "About Me",
+    "section": "Education",
+    "text": "Education\nBrigham Young University, Provo, UT B.S. Statistics: Data Science Expected Apr 2027"
   },
   {
     "objectID": "about.html#experience",
     "href": "about.html#experience",
     "title": "About Me",
-    "section": "",
-    "text": "Performed ETL to make data processes more efficient\n\n\n\n\n\nConstructed data reports using statistical techniques, R, Tableau, and Power BI\n\n\n\n\n\nUtilized Bayesian techniques to gain insights into fashion trends and how they relate to brands"
+    "section": "Experience",
+    "text": "Experience\n\nData Integration Specialist · BYU Office of Information Technology (OIT)\nApr 2026 - Present\n\nBuilt and maintained ETL (extract, transform, load) processes to make campus data workflows more efficient.\nCreated a swagger file combining multiple API endpoints without any previous knowledge of APIs and successfully loaded it into informatica cloud to run a process.\nCut an Informatica Cloud data integration job’s runtime from 15 hours to 10 minutes (about 99% faster) by finding and fixing a character-encoding (code page) bottleneck in the source configuration.\n\n\n\nData Analyst Intern · BYU Office of Belonging\nSep 2026 - Present\n\nAnalyzed survey responses from 250+ students per event to measure how students experienced Belonging Week events and which of 12 outreach channels reached them, using R, Power BI, and Tableau.\nCompared 2025 and 2026 kickoff-event results and used two-proportion tests to tell real changes from noise, flagging which shifts were and weren’t statistically significant.\nWrote plain-language interpretations alongside each chart; my supervisor shared the reports with the office team to guide event planning and promotion.\n\n\n\nResearch Assistant · Bayesian analysis of fashion trends\nApr 2026 - Sep 2026\n\nUsed Bayesian methods to model fashion trends and how they relate to brands. Read the paper (PDF)"
   },
   {
     "objectID": "about.html#skills",
     "href": "about.html#skills",
     "title": "About Me",
-    "section": "",
-    "text": "R\nSQL\nPython\nGit/Github\nQuarto\nStreamlit dashboards\nC++"
+    "section": "Skills",
+    "text": "Skills\n\n\n\n\n\n\n\nLanguages\nSQL, R, Python (pandas), C++\n\n\nVisualization & BI\nTableau, Power BI, ggplot2, Streamlit dashboards\n\n\nTools\nGit/GitHub, Quarto, Linux command line, Docker\n\n\nMethods\nData cleaning, ETL, reporting for non-technical audiences, Bayesian statistics\n\n\n\nSee my projects →"
   },
   {
     "objectID": "index.html",
     "href": "index.html",
-    "title": "isaiah-cabrinha.github.io",
+    "title": "Isaiah Cabrinha",
     "section": "",
-    "text": "This is a Quarto website.\nTo learn more about Quarto websites visit https://quarto.org/docs/websites."
+    "text": "I’m a BYU student who turns messy data into clear answers. I write SQL to pull and join data, analyze it in R and Python, and deliver the results as reports and dashboards that non-technical readers can act on. In my data integration role, I cut a 15-hour ETL job to 10 minutes.\nAbout me See my projects"
+  },
+  {
+    "objectID": "index.html#recent-posts",
+    "href": "index.html#recent-posts",
+    "title": "Isaiah Cabrinha",
+    "section": "Recent posts",
+    "text": "Recent posts\n\n\n\n\n\n\n\n\nWhen Do Utah’s Birds Show Up? Building a Bird Dataset from iNaturalist\n\n\n\n\n\n\nNov 15, 2026\n\n\n\n\n\n\n\n\n\n\n\nWho Gained the Most Places? Comparing F1 Grid and Finish Positions with pandas\n\n\nMerge race data, calculate positions gained or lost, and chart the results.\n\n\n\nOct 13, 2026\n\n\n\n\n\n\nNo matching items\n\nAll posts →"
   },
   {
     "objectID": "posts/utah-birds-blog.html",
@@ -180,5 +271,68 @@
     "title": "When Do Utah’s Birds Show Up? Building a Bird Dataset from iNaturalist",
     "section": "Learn more",
     "text": "Learn more\n\niNaturalist API documentation\niNaturalist API Recommended Practices\npyinaturalist, a Python client with built-in rate limiting\nAVONET paper (Tobias et al., 2022)\neBird API 2.0, another source for bird observations\nCode and data: github.com/isaiah-cabrinha/utah-birds"
+  },
+  {
+    "objectID": "projects/hospital-sql.html",
+    "href": "projects/hospital-sql.html",
+    "title": "Hospital Operations Review",
+    "section": "",
+    "text": "Hospital leadership asked three questions: which surgeries are most common, how long patients stay, and which nurses carry the heaviest load. The queries below run against a MySQL hospital database from R (DBI/RMariaDB) inside a Quarto document, and every number in the report is computed from their results.\n← Back to projects · Read the finished report (PDF)"
+  },
+  {
+    "objectID": "projects/hospital-sql.html#sizing-up-the-data",
+    "href": "projects/hospital-sql.html#sizing-up-the-data",
+    "title": "Hospital Operations Review",
+    "section": "Sizing up the data",
+    "text": "Sizing up the data\nScalar subqueries return every headline count in a single row.\n-- Size of the data the report is based on\nSELECT\n  (SELECT COUNT(*) FROM patients)                                   AS n_patients,\n  (SELECT COUNT(*) FROM surgeryrecord)                              AS n_surgeries,\n  (SELECT COUNT(*) FROM roomrecords) + (SELECT COUNT(*) FROM bedrecords) AS n_stays,\n  (SELECT COUNT(*) FROM nurse)                                      AS n_nurses,\n  (SELECT MIN(surgery_Date) FROM surgeryrecord)                     AS first_surgery,\n  (SELECT MAX(surgery_Date) FROM surgeryrecord)                     AS last_surgery;"
+  },
+  {
+    "objectID": "projects/hospital-sql.html#surgery-volume-and-length",
+    "href": "projects/hospital-sql.html#surgery-volume-and-length",
+    "title": "Hospital Operations Review",
+    "section": "Surgery volume and length",
+    "text": "Surgery volume and length\nCounts and share of each surgery type. Durations use TIMEDIFF, and a CASE adds 24 hours when a surgery crosses midnight so lengths never go negative.\n-- How often each surgery type happens and how long it takes.\n-- If a surgery crosses midnight, add 24 hours so the length is not negative.\nSELECT\n  surgery_Type,\n  COUNT(*)                                                         AS n_surgeries,\n  ROUND(100 * COUNT(*) / (SELECT COUNT(*) FROM surgeryrecord), 1)  AS pct_of_all,\n  ROUND(AVG(duration_min), 0)                                      AS avg_minutes\nFROM (\n  SELECT\n    surgery_Type,\n    (TIME_TO_SEC(TIMEDIFF(end_Time, start_Time))\n      + CASE WHEN TIME_TO_SEC(TIMEDIFF(end_Time, start_Time)) &lt; 0 THEN 86400 ELSE 0 END) / 60\n      AS duration_min\n  FROM surgeryrecord\n) s\nGROUP BY surgery_Type\nORDER BY n_surgeries DESC;"
+  },
+  {
+    "objectID": "projects/hospital-sql.html#every-completed-stay",
+    "href": "projects/hospital-sql.html#every-completed-stay",
+    "title": "Hospital Operations Review",
+    "section": "Every completed stay",
+    "text": "Every completed stay\nUNION ALL stacks private-room and ward-bed stays into one table, with LEFT JOINs to look up each stay’s department and DATEDIFF for length of stay.\n-- One row per completed hospital stay (private rooms + ward beds),\n-- with the department and unit where the patient stayed.\nSELECT\n  'Private room'                                   AS stay_type,\n  rr.patient_Id,\n  d.dept_Name,\n  rr.admission_Date,\n  rr.discharge_Date,\n  DATEDIFF(rr.discharge_Date, rr.admission_Date)   AS los_days\nFROM roomrecords rr\nLEFT JOIN room ro       ON rr.room_no  = ro.room_No\nLEFT JOIN department d  ON ro.dept_Id  = d.dept_Id\nWHERE rr.discharge_Date IS NOT NULL\nUNION ALL\nSELECT\n  'Ward bed'                                       AS stay_type,\n  br.patient_Id,\n  d.dept_Name,\n  br.admission_Date,\n  br.discharge_Date,\n  DATEDIFF(br.discharge_Date, br.admission_Date)   AS los_days\nFROM bedrecords br\nLEFT JOIN bed b         ON br.bed_No  = b.bed_No\nLEFT JOIN ward w        ON b.ward_No  = w.ward_No\nLEFT JOIN department d  ON w.dept_Id  = d.dept_Id\nWHERE br.discharge_Date IS NOT NULL;"
+  },
+  {
+    "objectID": "projects/hospital-sql.html#length-of-stay-by-accommodation",
+    "href": "projects/hospital-sql.html#length-of-stay-by-accommodation",
+    "title": "Hospital Operations Review",
+    "section": "Length of stay by accommodation",
+    "text": "Length of stay by accommodation\nSummary statistics for private rooms versus ward beds.\n-- Length-of-stay summary for each kind of stay\nSELECT\n  stay_type,\n  COUNT(*)                 AS n_stays,\n  ROUND(AVG(los_days), 1)  AS avg_days,\n  MIN(los_days)            AS shortest,\n  MAX(los_days)            AS longest\nFROM (\n  SELECT 'Private room' AS stay_type, DATEDIFF(discharge_Date, admission_Date) AS los_days\n  FROM roomrecords WHERE discharge_Date IS NOT NULL\n  UNION ALL\n  SELECT 'Ward bed', DATEDIFF(discharge_Date, admission_Date)\n  FROM bedrecords WHERE discharge_Date IS NOT NULL\n) t\nGROUP BY stay_type;"
+  },
+  {
+    "objectID": "projects/hospital-sql.html#length-of-stay-by-department",
+    "href": "projects/hospital-sql.html#length-of-stay-by-department",
+    "title": "Hospital Operations Review",
+    "section": "Length of stay by department",
+    "text": "Length of stay by department\nAverage stay per department, with COALESCE so unmatched stays show up as “Unassigned” instead of disappearing.\n-- Average stay by department (rooms and ward beds combined)\nSELECT\n  COALESCE(dept_Name, 'Unassigned')  AS dept_Name,\n  COUNT(*)                           AS n_stays,\n  ROUND(AVG(los_days), 1)            AS avg_days\nFROM (\n  SELECT d.dept_Name, DATEDIFF(rr.discharge_Date, rr.admission_Date) AS los_days\n  FROM roomrecords rr\n  LEFT JOIN room ro      ON rr.room_no = ro.room_No\n  LEFT JOIN department d ON ro.dept_Id = d.dept_Id\n  WHERE rr.discharge_Date IS NOT NULL\n  UNION ALL\n  SELECT d.dept_Name, DATEDIFF(br.discharge_Date, br.admission_Date)\n  FROM bedrecords br\n  LEFT JOIN bed b        ON br.bed_No  = b.bed_No\n  LEFT JOIN ward w       ON b.ward_No  = w.ward_No\n  LEFT JOIN department d ON w.dept_Id  = d.dept_Id\n  WHERE br.discharge_Date IS NOT NULL\n) t\nGROUP BY COALESCE(dept_Name, 'Unassigned')\nORDER BY avg_days DESC;"
+  },
+  {
+    "objectID": "projects/hospital-sql.html#patients-still-admitted",
+    "href": "projects/hospital-sql.html#patients-still-admitted",
+    "title": "Hospital Operations Review",
+    "section": "Patients still admitted",
+    "text": "Patients still admitted\nA check for open stays, so the report can say whether any were left out of the averages.\n-- Patients who have not been discharged yet (left out of the averages)\nSELECT\n  (SELECT COUNT(*) FROM roomrecords WHERE discharge_Date IS NULL) +\n  (SELECT COUNT(*) FROM bedrecords  WHERE discharge_Date IS NULL) AS n_open;"
+  },
+  {
+    "objectID": "projects/hospital-sql.html#nurse-workload",
+    "href": "projects/hospital-sql.html#nurse-workload",
+    "title": "Hospital Operations Review",
+    "section": "Nurse workload",
+    "text": "Nurse workload\nEach activity (surgeries, room patients, ward patients, shifts) is aggregated in its own subquery before joining. Joining the raw tables directly would multiply rows and double-count assignments.\n-- Workload per nurse. Each activity is counted in its own subquery first,\n-- so joining them together does not double-count anything.\nSELECT\n  n.nurse_Id,\n  CONCAT(n.FName, ' ', n.LName)        AS nurse,\n  COALESCE(d.dept_Name, 'Unassigned')  AS dept_Name,\n  COALESCE(s.surgeries, 0)             AS surgeries,\n  COALESCE(r.room_adm, 0)              AS room_admissions,\n  COALESCE(b.bed_adm, 0)               AS bed_admissions,\n  COALESCE(s.surgeries, 0) + COALESCE(r.room_adm, 0) + COALESCE(b.bed_adm, 0)\n                                       AS total_assignments,\n  COALESCE(sh.shifts, 0)               AS shifts,\n  COALESCE(sh.shift_hours, 0)          AS shift_hours\nFROM nurse n\nLEFT JOIN department d ON n.dept_Id = d.dept_Id\nLEFT JOIN (SELECT nurse_Id, COUNT(*) AS surgeries\n           FROM surgeryrecord GROUP BY nurse_Id) s  ON s.nurse_Id  = n.nurse_Id\nLEFT JOIN (SELECT nurse_Id, COUNT(*) AS room_adm\n           FROM roomrecords   GROUP BY nurse_Id) r  ON r.nurse_Id  = n.nurse_Id\nLEFT JOIN (SELECT nurse_Id, COUNT(*) AS bed_adm\n           FROM bedrecords    GROUP BY nurse_Id) b  ON b.nurse_Id  = n.nurse_Id\nLEFT JOIN (SELECT nurse_Id,\n                  COUNT(*) AS shifts,\n                  ROUND(SUM(TIME_TO_SEC(TIMEDIFF(shift_End, shift_Start))\n                        + CASE WHEN TIME_TO_SEC(TIMEDIFF(shift_End, shift_Start)) &lt; 0\n                               THEN 86400 ELSE 0 END) / 3600, 1) AS shift_hours\n           FROM staffshift\n           WHERE nurse_Id IS NOT NULL\n           GROUP BY nurse_Id) sh                     ON sh.nurse_Id = n.nurse_Id\nORDER BY total_assignments DESC, nurse;"
+  },
+  {
+    "objectID": "projects/hospital-sql.html#from-queries-to-report",
+    "href": "projects/hospital-sql.html#from-queries-to-report",
+    "title": "Hospital Operations Review",
+    "section": "From queries to report",
+    "text": "From queries to report\nIn R I turned the query results into the numbers quoted in the text (median stay, the share of bed-days from stays over a week, how many nurses carry double the average load) and built every chart with ggplot2. The sentences are written with inline R, so wording like “five nurses tie for…” adjusts automatically if the data changes."
   }
 ]
