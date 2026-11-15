@@ -1,7 +1,46 @@
 ---
-title: "isaiah-cabrinha.github.io"
+title: "Isaiah Cabrinha"
+subtitle: "Aspiring data analyst · SQL, R, Python & data visualization"
+pagetitle: "Isaiah Cabrinha"
+about:
+  template: jolla
+  # Add a headshot to images/ and uncomment the next line
+  image: images/profile.jpg.jpg
+  links:
+    - icon: github
+      text: GitHub
+      href: https://github.com/isaiah-cabrinha
+    - icon: linkedin
+      text: LinkedIn
+      href: https://www.linkedin.com/in/isaiah-cabrinha
+    # - icon: envelope
+    #   text: Email
+    #   href: mailto:YOUR-EMAIL
+    # - icon: file-earmark-person
+    #   text: Résumé
+    #   href: files/resume.pdf
+listing:
+  id: recent-posts
+  contents: posts
+  sort: "date desc"
+  type: grid
+  max-items: 3
+  fields: [image, date, title, description]
+  categories: false
 ---
 
-This is a Quarto website.
+:::{#hero-intro}
+I'm a BYU student who turns messy data into clear answers. I write **SQL** to pull and join data,
+analyze it in **R** and **Python**, and deliver the results as reports and dashboards that
+non-technical readers can act on. In my data integration role, I cut a 15-hour ETL job to
+10 minutes.
 
-To learn more about Quarto websites visit <https://quarto.org/docs/websites>.
+[About me](about.qmd){.btn .btn-primary} [See my projects](projects.qmd){.btn .btn-outline-primary}
+:::
+
+## Recent posts
+
+:::{#recent-posts}
+:::
+
+[All posts →](blogs.qmd)

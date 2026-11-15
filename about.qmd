@@ -1,28 +1,51 @@
 ---
 title: "About Me"
+toc: true
 ---
 
-# Isaiah Cabrinha
+I'm a data analyst in training at Brigham Young University (BYU). What I enjoy most is the full path
+from raw data to a decision: writing the SQL to pull and join the data, cleaning it, analyzing it in
+R or Python, and building a chart, report, or dashboard that makes the answer obvious to someone who
+never has to see the code.
+
+I'm looking for data analyst roles where I can turn business questions into clear, useful answers.
+Outside of work I follow Formula 1 closely, which is where a lot of my practice datasets come from.
+
+## Education
+
+**Brigham Young University**, Provo, UT
+B.S. Statistics: Data Science Expected Apr 2027
+
 
 ## Experience
 
-### Data Integration Specialist (BYU OIT)
-- Performed ETL to make data processes more efficient
+### Data Integration Specialist · BYU Office of Information Technology (OIT)
+Apr 2026 - Present
 
-### Data Analyst Intern (BYU Office of Belonging)
-- Constructed data reports using statistical techniques, R, Tableau, and Power BI
+- Built and maintained ETL (extract, transform, load) processes to make campus data workflows more efficient.
+- Created a swagger file combining multiple API endpoints without any previous knowledge of APIs and successfully loaded it into informatica cloud to run a process.
+- Cut an Informatica Cloud data integration job’s runtime from 15 hours to 10 minutes (about 99% faster) by finding and fixing a character-encoding (code page) bottleneck in the source configuration.
 
-### Research Assistant
-- Utilized Bayesian techniques to gain insights into fashion trends and how they relate to brands
+### Data Analyst Intern · BYU Office of Belonging
+Sep 2026 - Present
 
+- Analyzed survey responses from 250+ students per event to measure how students experienced Belonging Week events and which of 12 outreach channels reached them, using R, Power BI, and Tableau.
+- Compared 2025 and 2026 kickoff-event results and used two-proportion tests to tell real changes from noise, flagging which shifts were and weren’t statistically significant.
+- Wrote plain-language interpretations alongside each chart; my supervisor shared the reports with the office team to guide event planning and promotion.
+
+### Research Assistant · Bayesian analysis of fashion trends
+Apr 2026 - Sep 2026
+
+- Used Bayesian methods to model fashion trends and how they relate to brands.
+  [Read the paper (PDF)](files/Fashion-Trend-Research.pdf)
 
 ## Skills
-- R
-- SQL
-- Python
-- Git/Github
-- Quarto
-- Streamlit dashboards
-- C++
 
+| | |
+|---|---|
+| **Languages** | SQL, R, Python (pandas), C++ |
+| **Visualization & BI** | Tableau, Power BI, ggplot2, Streamlit dashboards |
+| **Tools** | Git/GitHub, Quarto, Linux command line, Docker |
+| **Methods** | Data cleaning, ETL, reporting for non-technical audiences, Bayesian statistics |
 
+[See my projects →](projects.qmd)

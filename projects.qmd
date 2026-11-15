@@ -1,6 +1,78 @@
 ---
 title: "Projects"
+toc: false
 ---
 
-## Bayesian Approach to Data Analysis
-[Fashion Trend Research (PDF)](files/Fashion-Trend-Research.pdf){target="_blank"}
+A selection of my data work. Each card links to the full write-up.
+
+## SQL & R reports
+
+::: {.grid}
+
+::: {.g-col-12 .g-col-md-6 .project-card}
+### Premier League Scouting Report
+**SQL · R · ggplot2**
+
+I queried a database of 5 European leagues across 7 seasons (about 12,700 matches) to find out what
+wins games and which players to sign. The two strongest team-level stats, chance quality created
+and chance quality allowed, explain about 82% of the variation in points between teams. I then built
+a composite score to rank 1,065 players from outside the Premier League and recommended a shortlist
+of five.
+
+[Read the report (PDF) →](files/Football-Scouting-Report.pdf) · [See the SQL →](projects/football-sql.qmd)
+:::
+
+::: {.g-col-12 .g-col-md-6 .project-card}
+### Hospital Operations Review
+**SQL · R · ggplot2**
+
+I analyzed records of 1,500 patients, 1,000 surgeries, 2,000 stays, and 500 nurses to answer three
+questions from leadership: which surgeries are most common, how long patients stay, and which nurses
+carry the heaviest workloads. One key finding: the 17% of stays longer than a week account for 46%
+of all bed-days, which points to discharge planning as the best way to free up beds.
+
+[Read the report (PDF) →](files/Hospital-Operations-Report.pdf) · [See the SQL →](projects/hospital-sql.qmd)
+:::
+
+:::
+
+## Python projects
+
+::: {.grid}
+
+::: {.g-col-12 .g-col-md-6 .project-card}
+### When Do Utah's Birds Show Up?
+**Python · pandas · iNaturalist API**
+
+I built a dataset of Utah bird sightings from iNaturalist to find out when different species
+arrive and leave across the year.
+
+[Read the post →](posts/utah-birds-blog.qmd)
+:::
+
+::: {.g-col-12 .g-col-md-6 .project-card}
+### Who Gained the Most Places in F1?
+**Python · pandas · matplotlib**
+
+I merged race data and calculated each driver's places gained or lost from grid to finish,
+then charted the results.
+
+[Read the post →](posts/f1-positions/f1.qmd)
+:::
+
+:::
+
+## Statistical modeling
+
+::: {.grid}
+
+::: {.g-col-12 .g-col-md-6 .project-card}
+### Fashion Trends: A Bayesian Approach
+**Bayesian statistics · R**
+
+I used Bayesian modeling to measure how fashion trends relate to brands.
+
+[Read the paper (PDF) →](files/Fashion-Trend-Research.pdf)
+:::
+
+:::

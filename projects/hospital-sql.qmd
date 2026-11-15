@@ -1,0 +1,191 @@
+---
+title: "Hospital Operations Review"
+subtitle: "How I built it: the SQL behind the report"
+toc: true
+---
+
+Hospital leadership asked three questions: which surgeries are most common, how long patients stay, and which nurses carry the heaviest load. The queries below run against a MySQL hospital database from R (`DBI`/`RMariaDB`) inside a Quarto document, and every number in the report is computed from their results.
+
+[← Back to projects](../projects.qmd) · [Read the finished report (PDF)](../files/Hospital-Operations-Report.pdf)
+
+
+## Sizing up the data
+
+Scalar subqueries return every headline count in a single row.
+
+```sql
+-- Size of the data the report is based on
+SELECT
+  (SELECT COUNT(*) FROM patients)                                   AS n_patients,
+  (SELECT COUNT(*) FROM surgeryrecord)                              AS n_surgeries,
+  (SELECT COUNT(*) FROM roomrecords) + (SELECT COUNT(*) FROM bedrecords) AS n_stays,
+  (SELECT COUNT(*) FROM nurse)                                      AS n_nurses,
+  (SELECT MIN(surgery_Date) FROM surgeryrecord)                     AS first_surgery,
+  (SELECT MAX(surgery_Date) FROM surgeryrecord)                     AS last_surgery;
+```
+
+
+## Surgery volume and length
+
+Counts and share of each surgery type. Durations use `TIMEDIFF`, and a `CASE` adds 24 hours when a surgery crosses midnight so lengths never go negative.
+
+```sql
+-- How often each surgery type happens and how long it takes.
+-- If a surgery crosses midnight, add 24 hours so the length is not negative.
+SELECT
+  surgery_Type,
+  COUNT(*)                                                         AS n_surgeries,
+  ROUND(100 * COUNT(*) / (SELECT COUNT(*) FROM surgeryrecord), 1)  AS pct_of_all,
+  ROUND(AVG(duration_min), 0)                                      AS avg_minutes
+FROM (
+  SELECT
+    surgery_Type,
+    (TIME_TO_SEC(TIMEDIFF(end_Time, start_Time))
+      + CASE WHEN TIME_TO_SEC(TIMEDIFF(end_Time, start_Time)) < 0 THEN 86400 ELSE 0 END) / 60
+      AS duration_min
+  FROM surgeryrecord
+) s
+GROUP BY surgery_Type
+ORDER BY n_surgeries DESC;
+```
+
+
+## Every completed stay
+
+`UNION ALL` stacks private-room and ward-bed stays into one table, with `LEFT JOIN`s to look up each stay's department and `DATEDIFF` for length of stay.
+
+```sql
+-- One row per completed hospital stay (private rooms + ward beds),
+-- with the department and unit where the patient stayed.
+SELECT
+  'Private room'                                   AS stay_type,
+  rr.patient_Id,
+  d.dept_Name,
+  rr.admission_Date,
+  rr.discharge_Date,
+  DATEDIFF(rr.discharge_Date, rr.admission_Date)   AS los_days
+FROM roomrecords rr
+LEFT JOIN room ro       ON rr.room_no  = ro.room_No
+LEFT JOIN department d  ON ro.dept_Id  = d.dept_Id
+WHERE rr.discharge_Date IS NOT NULL
+UNION ALL
+SELECT
+  'Ward bed'                                       AS stay_type,
+  br.patient_Id,
+  d.dept_Name,
+  br.admission_Date,
+  br.discharge_Date,
+  DATEDIFF(br.discharge_Date, br.admission_Date)   AS los_days
+FROM bedrecords br
+LEFT JOIN bed b         ON br.bed_No  = b.bed_No
+LEFT JOIN ward w        ON b.ward_No  = w.ward_No
+LEFT JOIN department d  ON w.dept_Id  = d.dept_Id
+WHERE br.discharge_Date IS NOT NULL;
+```
+
+
+## Length of stay by accommodation
+
+Summary statistics for private rooms versus ward beds.
+
+```sql
+-- Length-of-stay summary for each kind of stay
+SELECT
+  stay_type,
+  COUNT(*)                 AS n_stays,
+  ROUND(AVG(los_days), 1)  AS avg_days,
+  MIN(los_days)            AS shortest,
+  MAX(los_days)            AS longest
+FROM (
+  SELECT 'Private room' AS stay_type, DATEDIFF(discharge_Date, admission_Date) AS los_days
+  FROM roomrecords WHERE discharge_Date IS NOT NULL
+  UNION ALL
+  SELECT 'Ward bed', DATEDIFF(discharge_Date, admission_Date)
+  FROM bedrecords WHERE discharge_Date IS NOT NULL
+) t
+GROUP BY stay_type;
+```
+
+
+## Length of stay by department
+
+Average stay per department, with `COALESCE` so unmatched stays show up as "Unassigned" instead of disappearing.
+
+```sql
+-- Average stay by department (rooms and ward beds combined)
+SELECT
+  COALESCE(dept_Name, 'Unassigned')  AS dept_Name,
+  COUNT(*)                           AS n_stays,
+  ROUND(AVG(los_days), 1)            AS avg_days
+FROM (
+  SELECT d.dept_Name, DATEDIFF(rr.discharge_Date, rr.admission_Date) AS los_days
+  FROM roomrecords rr
+  LEFT JOIN room ro      ON rr.room_no = ro.room_No
+  LEFT JOIN department d ON ro.dept_Id = d.dept_Id
+  WHERE rr.discharge_Date IS NOT NULL
+  UNION ALL
+  SELECT d.dept_Name, DATEDIFF(br.discharge_Date, br.admission_Date)
+  FROM bedrecords br
+  LEFT JOIN bed b        ON br.bed_No  = b.bed_No
+  LEFT JOIN ward w       ON b.ward_No  = w.ward_No
+  LEFT JOIN department d ON w.dept_Id  = d.dept_Id
+  WHERE br.discharge_Date IS NOT NULL
+) t
+GROUP BY COALESCE(dept_Name, 'Unassigned')
+ORDER BY avg_days DESC;
+```
+
+
+## Patients still admitted
+
+A check for open stays, so the report can say whether any were left out of the averages.
+
+```sql
+-- Patients who have not been discharged yet (left out of the averages)
+SELECT
+  (SELECT COUNT(*) FROM roomrecords WHERE discharge_Date IS NULL) +
+  (SELECT COUNT(*) FROM bedrecords  WHERE discharge_Date IS NULL) AS n_open;
+```
+
+
+## Nurse workload
+
+Each activity (surgeries, room patients, ward patients, shifts) is aggregated in **its own subquery before joining**. Joining the raw tables directly would multiply rows and double-count assignments.
+
+```sql
+-- Workload per nurse. Each activity is counted in its own subquery first,
+-- so joining them together does not double-count anything.
+SELECT
+  n.nurse_Id,
+  CONCAT(n.FName, ' ', n.LName)        AS nurse,
+  COALESCE(d.dept_Name, 'Unassigned')  AS dept_Name,
+  COALESCE(s.surgeries, 0)             AS surgeries,
+  COALESCE(r.room_adm, 0)              AS room_admissions,
+  COALESCE(b.bed_adm, 0)               AS bed_admissions,
+  COALESCE(s.surgeries, 0) + COALESCE(r.room_adm, 0) + COALESCE(b.bed_adm, 0)
+                                       AS total_assignments,
+  COALESCE(sh.shifts, 0)               AS shifts,
+  COALESCE(sh.shift_hours, 0)          AS shift_hours
+FROM nurse n
+LEFT JOIN department d ON n.dept_Id = d.dept_Id
+LEFT JOIN (SELECT nurse_Id, COUNT(*) AS surgeries
+           FROM surgeryrecord GROUP BY nurse_Id) s  ON s.nurse_Id  = n.nurse_Id
+LEFT JOIN (SELECT nurse_Id, COUNT(*) AS room_adm
+           FROM roomrecords   GROUP BY nurse_Id) r  ON r.nurse_Id  = n.nurse_Id
+LEFT JOIN (SELECT nurse_Id, COUNT(*) AS bed_adm
+           FROM bedrecords    GROUP BY nurse_Id) b  ON b.nurse_Id  = n.nurse_Id
+LEFT JOIN (SELECT nurse_Id,
+                  COUNT(*) AS shifts,
+                  ROUND(SUM(TIME_TO_SEC(TIMEDIFF(shift_End, shift_Start))
+                        + CASE WHEN TIME_TO_SEC(TIMEDIFF(shift_End, shift_Start)) < 0
+                               THEN 86400 ELSE 0 END) / 3600, 1) AS shift_hours
+           FROM staffshift
+           WHERE nurse_Id IS NOT NULL
+           GROUP BY nurse_Id) sh                     ON sh.nurse_Id = n.nurse_Id
+ORDER BY total_assignments DESC, nurse;
+```
+
+
+## From queries to report
+
+In R I turned the query results into the numbers quoted in the text (median stay, the share of bed-days from stays over a week, how many nurses carry double the average load) and built every chart with `ggplot2`. The sentences are written with inline R, so wording like "five nurses tie for…" adjusts automatically if the data changes.

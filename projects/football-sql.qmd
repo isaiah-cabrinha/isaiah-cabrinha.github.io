@@ -1,0 +1,196 @@
+---
+title: "Premier League Scouting Report"
+subtitle: "How I built it: the SQL behind the report"
+toc: true
+---
+
+The report answers four questions from a scouting department using a MySQL database of five European leagues (2014/15 to 2020/21). Each query below runs from R with `DBI`/`RMariaDB` inside a Quarto document, and the results feed the tables, charts and in-text numbers, so the report updates if the data changes.
+
+[← Back to projects](../projects.qmd) · [Read the finished report (PDF)](../files/Football-Scouting-Report.pdf)
+
+
+## Sizing up the data
+
+Joins games, leagues and appearances to count matches and distinct players per league.
+
+```sql
+-- Size of the data by league
+SELECT l.name                     AS league,
+       MIN(g.season)              AS first_season,
+       MAX(g.season)              AS last_season,
+       COUNT(DISTINCT g.gameID)   AS matches,
+       COUNT(DISTINCT a.playerID) AS players
+FROM games g
+JOIN leagues l     ON g.leagueID = l.leagueID
+JOIN appearances a ON a.gameID   = g.gameID
+GROUP BY l.name
+ORDER BY matches DESC;
+```
+
+
+## Expected goals leaders
+
+Per-90 rates over the last three seasons, with a minimum-minutes filter in `HAVING` so part-time players don't skew the ranking.
+
+```sql
+-- Highest expected goals per 90 minutes, last three seasons, min. 2,700 minutes
+SELECT p.name                               AS player,
+       l.name                               AS league,
+       COUNT(*)                             AS appearances,
+       SUM(a.time)                          AS minutes,
+       SUM(a.goals)                         AS goals,
+       ROUND(SUM(a.xGoals), 1)              AS xg,
+       SUM(a.xGoals) / SUM(a.time) * 90     AS xg_per90,
+       SUM(a.goals)  / SUM(a.time) * 90     AS goals_per90
+FROM appearances a
+JOIN players p ON a.playerID = p.playerID
+JOIN games   g ON a.gameID   = g.gameID
+JOIN leagues l ON a.leagueID = l.leagueID
+WHERE g.season >= (SELECT MAX(season) - 2 FROM games)
+GROUP BY a.playerID, p.name, l.name
+HAVING SUM(a.time) >= 2700
+ORDER BY xg_per90 DESC
+LIMIT 10;
+```
+
+
+## Assist leaders
+
+The same structure applied to assists and expected assists.
+
+```sql
+-- Most assists, last three seasons
+SELECT p.name                               AS player,
+       l.name                               AS league,
+       SUM(a.time)                          AS minutes,
+       SUM(a.assists)                       AS assists,
+       ROUND(SUM(a.xAssists), 1)            AS xa,
+       SUM(a.assists) / SUM(a.time) * 90    AS assists_per90
+FROM appearances a
+JOIN players p ON a.playerID = p.playerID
+JOIN games   g ON a.gameID   = g.gameID
+JOIN leagues l ON a.leagueID = l.leagueID
+WHERE g.season >= (SELECT MAX(season) - 2 FROM games)
+GROUP BY a.playerID, p.name, l.name
+ORDER BY assists DESC
+LIMIT 10;
+```
+
+
+## Key pass leaders
+
+Key passes per 90 as a steadier measure of chance creation.
+
+```sql
+-- Most key passes (passes that lead directly to a shot), last three seasons
+SELECT p.name                                AS player,
+       l.name                                AS league,
+       SUM(a.time)                           AS minutes,
+       SUM(a.keyPasses)                      AS key_passes,
+       SUM(a.keyPasses) / SUM(a.time) * 90   AS key_passes_per90,
+       SUM(a.assists)                        AS assists
+FROM appearances a
+JOIN players p ON a.playerID = p.playerID
+JOIN games   g ON a.gameID   = g.gameID
+JOIN leagues l ON a.leagueID = l.leagueID
+WHERE g.season >= (SELECT MAX(season) - 2 FROM games)
+GROUP BY a.playerID, p.name, l.name
+ORDER BY key_passes DESC
+LIMIT 10;
+```
+
+
+## Team-season summaries
+
+A **self-join** on `teamstats` pairs each team with its opponent in the same game, so goals and xG *against* can be summed next to goals and xG *for*. `CASE` turns results into points.
+
+```sql
+-- One row per team per season, with the opponent's numbers joined on
+SELECT t.name   AS team,
+       l.name   AS league,
+       ts.season,
+       COUNT(*) AS matches,
+       SUM(CASE ts.result WHEN 'W' THEN 3 WHEN 'D' THEN 1 ELSE 0 END) AS points,
+       SUM(ts.goals)          AS goals_for,
+       SUM(opp.goals)         AS goals_against,
+       SUM(ts.xGoals)         AS xg_for,
+       SUM(opp.xGoals)        AS xg_against,
+       SUM(ts.shots)          AS shots,
+       SUM(ts.shotsOnTarget)  AS shots_on_target,
+       SUM(ts.deep)           AS deep_passes,
+       AVG(ts.ppda)           AS ppda,
+       SUM(ts.fouls)          AS fouls,
+       SUM(ts.corners)        AS corners,
+       SUM(ts.yellowCards)    AS yellow_cards
+FROM teamstats ts
+JOIN teamstats opp ON opp.gameID = ts.gameID AND opp.teamID <> ts.teamID
+JOIN teams   t     ON ts.teamID  = t.teamID
+JOIN games   g     ON ts.gameID  = g.gameID
+JOIN leagues l     ON g.leagueID = l.leagueID
+GROUP BY t.name, l.name, ts.season;
+```
+
+
+## Transfer candidates
+
+Outfield players outside the Premier League with a minimum-minutes filter. A `NOT IN` subquery drops anyone who already played in England, and `SUM(position = 'GK') = 0` excludes goalkeepers.
+
+```sql
+-- Outfield players outside the Premier League, last two seasons, min. 2,000 minutes
+SELECT p.name                                   AS player,
+       l.name                                   AS league,
+       COUNT(*)                                 AS appearances,
+       SUM(a.time)                              AS minutes,
+       SUM(a.goals)                             AS goals,
+       SUM(a.assists)                           AS assists,
+       SUM(a.goals)         / SUM(a.time) * 90  AS goals_per90,
+       SUM(a.xGoals)        / SUM(a.time) * 90  AS xg_per90,
+       SUM(a.xAssists)      / SUM(a.time) * 90  AS xa_per90,
+       SUM(a.keyPasses)     / SUM(a.time) * 90  AS kp_per90,
+       SUM(a.xGoalsChain)   / SUM(a.time) * 90  AS xgchain_per90,
+       SUM(a.goals) - SUM(a.xGoals)             AS finishing_vs_xg
+FROM appearances a
+JOIN players p ON a.playerID = p.playerID
+JOIN games   g ON a.gameID   = g.gameID
+JOIN leagues l ON a.leagueID = l.leagueID
+WHERE g.season >= (SELECT MAX(season) - 1 FROM games)
+  AND l.name <> 'Premier League'
+  AND a.playerID NOT IN (
+        SELECT a2.playerID
+        FROM appearances a2
+        JOIN games   g2 ON a2.gameID   = g2.gameID
+        JOIN leagues l2 ON a2.leagueID = l2.leagueID
+        WHERE l2.name = 'Premier League'
+          AND g2.season >= (SELECT MAX(season) - 1 FROM games))
+GROUP BY a.playerID, p.name, l.name
+HAVING SUM(a.time) >= 2000
+   AND SUM(a.position = 'GK') = 0;
+```
+
+
+## Premier League benchmark
+
+The same per-90 measures for Premier League regulars, used as the bar the shortlist has to clear.
+
+```sql
+-- Benchmark: the same measures for Premier League outfield regulars
+SELECT SUM(a.goals)     / SUM(a.time) * 90  AS goals_per90,
+       SUM(a.xGoals)    / SUM(a.time) * 90  AS xg_per90,
+       SUM(a.xAssists)  / SUM(a.time) * 90  AS xa_per90,
+       SUM(a.keyPasses) / SUM(a.time) * 90  AS kp_per90,
+       SUM(a.time)                          AS minutes,
+       a.playerID
+FROM appearances a
+JOIN games   g ON a.gameID   = g.gameID
+JOIN leagues l ON a.leagueID = l.leagueID
+WHERE g.season >= (SELECT MAX(season) - 1 FROM games)
+  AND l.name = 'Premier League'
+GROUP BY a.playerID
+HAVING SUM(a.time) >= 2000
+   AND SUM(a.position = 'GK') = 0;
+```
+
+
+## From queries to report
+
+In R I converted MySQL's 64-bit integers to plain numbers, then used `dplyr` and `tidyr` to build per-game rates. I correlated each team stat with points per game and fit a linear model (`lm(ppg ~ xG for + xG against)`) that explains about 82% of the variation in points. I scored candidates by averaging their z-scores across five per-90 measures, and built every chart with `ggplot2`.
