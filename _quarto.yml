@@ -5,23 +5,38 @@ project:
     - "files/**"
 
 website:
-  title: Isaiah Cabrinha
+  title: "Isaiah Cabrinha"
+  site-url: https://isaiah-cabrinha.github.io
+  repo-url: https://github.com/isaiah-cabrinha/isaiah-cabrinha.github.io
+  description: "Isaiah Cabrinha: aspiring data analyst working in SQL, R, Python, and data visualization."
   navbar:
     left:
       - href: index.qmd
         text: Home
-      - about.qmd
-      - projects.qmd
-      - blogs.qmd
+      - href: about.qmd
+        text: About
+      - href: projects.qmd
+        text: Projects
+      - href: blogs.qmd
+        text: Blog
+    right:
+      - icon: github
+        href: https://github.com/isaiah-cabrinha
+        aria-label: GitHub
+  page-footer:
+    left: "© 2026 Isaiah Cabrinha"
+    right: "Built with [Quarto](https://quarto.org)"
 
 format:
   html:
     theme:
       - cosmo
       - brand
+      - styles.scss
     css: styles.css
     toc: true
+    smooth-scroll: true
+    link-external-newwindow: true
 
 execute:
   freeze: auto
-
